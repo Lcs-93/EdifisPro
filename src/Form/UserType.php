@@ -20,7 +20,9 @@ class UserType extends AbstractType
             ->add('password')
             ->add('role', EntityType::class, [
                 'class' => Role::class,
-                'choice_label' => 'id',
+                'choice_label' => 'nom',
+	            'placeholder' => "Choisir un role",
+	            'required' => false,
             ])
         ;
     }

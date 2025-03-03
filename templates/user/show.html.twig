@@ -27,6 +27,10 @@
                 <th>Password</th>
                 <td>{{ user.password }}</td>
             </tr>
+            <tr>
+                <th>Rôle</th>
+                <td>{{ user.role ? user.role.nom : 'Aucun' }}</td>
+            </tr>
         </tbody>
     </table>
 
