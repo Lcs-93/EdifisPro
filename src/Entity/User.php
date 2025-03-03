@@ -1,15 +1,16 @@
 <?php
-
 namespace App\Entity;
 
 use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
-class User
+class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -22,14 +23,19 @@ class User
     #[ORM\Column(length: 255)]
     private ?string $prenom = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 180, unique: true)]
     private ?string $email = null;
+
+    // Colonne pour gérer les rôles sous forme de tableau JSON
+    #[ORM\Column(type: 'json')]
+    private array $roles = [];
 
     #[ORM\Column(length: 255)]
     private ?string $password = null;
 
-    #[ORM\ManyToOne(inversedBy: 'users')]
-    private ?Role $role = null;
+    // Supprimer la relation ManyToOne avec la table Role
+    // #[ORM\ManyToOne(inversedBy: 'users')]
+    // private ?Role $role = null;
 
     /**
      * @var Collection<int, CompetenceUser>
@@ -54,6 +60,7 @@ class User
         $this->competenceUsers = new ArrayCollection();
         $this->equipes = new ArrayCollection();
         $this->equipeUsers = new ArrayCollection();
+        $this->roles = ['ROLE_USER']; // Rôle par défaut
     }
 
     public function getId(): ?int
@@ -69,7 +76,6 @@ class User
     public function setNom(string $nom): static
     {
         $this->nom = $nom;
-
         return $this;
     }
 
@@ -81,7 +87,6 @@ class User
     public function setPrenom(string $prenom): static
     {
         $this->prenom = $prenom;
-
         return $this;
     }
 
@@ -93,7 +98,19 @@ class User
     public function setEmail(string $email): static
     {
         $this->email = $email;
+        return $this;
+    }
 
+    public function getRoles(): array
+    {
+        $roles = $this->roles;
+        $roles[] = 'ROLE_USER'; // S'assurer que chaque utilisateur a au moins ce rôle
+        return array_unique($roles);
+    }
+
+    public function setRoles(array $roles): static
+    {
+        $this->roles = $roles;
         return $this;
     }
 
@@ -105,20 +122,35 @@ class User
     public function setPassword(string $password): static
     {
         $this->password = $password;
-
         return $this;
     }
 
-    public function getRole(): ?Role
+    // Retirer la méthode `getRole()` car la relation avec `Role` est supprimée
+    // public function getRole(): ?Role
+    // {
+    //     return $this->role;
+    // }
+
+    // public function setRole(?Role $role): static
+    // {
+    //     $this->role = $role;
+    //     return $this;
+    // }
+
+    /**
+     * Méthode obligatoire pour `UserInterface`
+     */
+    public function getUserIdentifier(): string
     {
-        return $this->role;
+        return $this->email;
     }
 
-    public function setRole(?Role $role): static
+    /**
+     * Méthode obligatoire pour `UserInterface` (peut rester vide)
+     */
+    public function eraseCredentials(): void
     {
-        $this->role = $role;
-
-        return $this;
+        // Si l'entité stockait des données sensibles temporairement, les supprimer ici
     }
 
     /**
@@ -142,7 +174,6 @@ class User
     public function removeCompetenceUser(CompetenceUser $competenceUser): static
     {
         if ($this->competenceUsers->removeElement($competenceUser)) {
-            // set the owning side to null (unless already changed)
             if ($competenceUser->getUtilisateur() === $this) {
                 $competenceUser->setUtilisateur(null);
             }
@@ -172,7 +203,6 @@ class User
     public function removeEquipe(Equipe $equipe): static
     {
         if ($this->equipes->removeElement($equipe)) {
-            // set the owning side to null (unless already changed)
             if ($equipe->getChefEquipe() === $this) {
                 $equipe->setChefEquipe(null);
             }
@@ -202,7 +232,6 @@ class User
     public function removeEquipeUser(EquipeUser $equipeUser): static
     {
         if ($this->equipeUsers->removeElement($equipeUser)) {
-            // set the owning side to null (unless already changed)
             if ($equipeUser->getUtilisateur() === $this) {
                 $equipeUser->setUtilisateur(null);
             }

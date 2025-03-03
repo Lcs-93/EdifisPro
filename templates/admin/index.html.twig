@@ -1,0 +1,11 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Dashboard Admin{% endblock %}
+
+{% block body %}
+<h1>Bienvenue sur le Dashboard Admin</h1>
+
+<p>Vous pouvez gérer les employés et les chantiers ici.</p>
+
+<a href="{{ path('app_logout') }}">Déconnexion</a>
+{% endblock %}
