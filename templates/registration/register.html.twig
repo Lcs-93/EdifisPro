@@ -3,17 +3,44 @@
 {% block title %}Inscription{% endblock %}
 
 {% block body %}
-<h1>Inscription</h1>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <h1 class="my-4 text-center">Inscription</h1>
 
-{{ form_start(registrationForm) }}
-    {{ form_row(registrationForm.nom) }}
-    {{ form_row(registrationForm.prenom) }}
-    {{ form_row(registrationForm.email) }}
-    {{ form_row(registrationForm.plainPassword) }}
-    {{ form_row(registrationForm.roles) }}
+                <!-- Afficher les messages flash -->
+                {% for message in app.flashes('error') %}
+                    <div class="alert alert-danger">
+                        {{ message }}
+                    </div>
+                {% endfor %}
 
-    <button type="submit">S'inscrire</button>
-{{ form_end(registrationForm) }}
+                {{ form_start(registrationForm, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate'}}) }}
+                    
+                    <div class="form-group">
+                        {{ form_row(registrationForm.nom, {'attr': {'class': 'form-control'}}) }}
+                    </div>
+                    <div class="form-group">
+                        {{ form_row(registrationForm.prenom, {'attr': {'class': 'form-control'}}) }}
+                    </div>
+                    <div class="form-group">
+                        {{ form_row(registrationForm.email, {'attr': {'class': 'form-control'}}) }}
+                    </div>
+                    <div class="form-group">
+                        {{ form_row(registrationForm.plainPassword, {'attr': {'class': 'form-control', 'placeholder': 'Mot de passe'}}) }}
+                    </div>
+                    <div class="form-group">
+                        {{ form_row(registrationForm.roles, {'attr': {'class': 'form-control'}}) }}
+                    </div>
 
-<p>Déjà un compte ? <a href="{{ path('app_login') }}">Se connecter</a></p>
+                    <button type="submit" class="btn btn-primary btn-block">S'inscrire</button>
+                    
+                {{ form_end(registrationForm) }}
+
+                <div class="mt-3 text-center">
+                    <p>Déjà un compte ? <a href="{{ path('app_login') }}">Se connecter</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}
