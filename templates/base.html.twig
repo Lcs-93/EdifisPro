@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Mon Application{% endblock %}</title>
     
-    <!-- Lien vers le CDN de Bootstrap sans l'attribut integrity -->
+    <!-- Lien vers le CDN de Bootstrap -->
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet">
   
@@ -16,29 +16,45 @@
 <body>
 
     <!-- Barre de navigation -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <a class="navbar-brand" href="#">Mon Application</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ml-auto">
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <a class="navbar-brand" href="{{ path('app_chantier_index') }}">Mon Application</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ml-auto">
+            {% if app.user is null %}
                 <li class="nav-item">
                     <a class="nav-link" href="{{ path('app_login') }}">Connexion</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="{{ path('app_register') }}">Inscription</a>
                 </li>
-            </ul>
-        </div>
-    </nav>
+            {% else %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ path('app_logout') }}">Déconnexion</a>
+                </li>
+            {% endif %}
+            
+            {% if is_granted('ROLE_ADMIN') %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ path('app_chantier_new') }}">Créer un chantier</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ path('app_chantier_index') }}">Voir les chantiers</a>
+                </li>
+            {% endif %}
+        </ul>
+    </div>
+</nav>
+
 
     <!-- Contenu principal -->
     <main class="container my-4">
         {% block body %}{% endblock %}
     </main>
 
-    <!-- Scripts nécessaires pour Bootstrap sans l'attribut integrity -->
+    <!-- Scripts nécessaires pour Bootstrap -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
