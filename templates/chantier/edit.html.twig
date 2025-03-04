@@ -1,13 +1,59 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Edit Chantier{% endblock %}
+{% block title %}Modifier Chantier{% endblock %}
 
 {% block body %}
-    <h1>Edit Chantier</h1>
+    <div class="container mt-5">
+        <div class="card shadow-lg p-4">
+            <h1 class="text-center text-warning mb-4">Modifier le Chantier</h1>
 
-    {{ include('chantier/_form.html.twig', {'button_label': 'Update'}) }}
+            {{ form_start(form) }}
+            
+            <div class="mb-3">
+                {{ form_label(form.lieu, 'Adresse du Chantier', {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(form.lieu, {'attr': {'class': 'form-control', 'placeholder': 'Ex: Paris, Lyon...'}}) }}
+            </div>
 
-    <a href="{{ path('app_chantier_index') }}">back to list</a>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    {{ form_label(form.dateDebut, 'Date de Début', {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.dateDebut, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_errors(form.dateDebut) }}
+                </div>
+                <div class="col-md-6 mb-3">
+                    {{ form_label(form.dateFin, 'Date de Fin', {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.dateFin, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_errors(form.dateFin) }}
+                </div>
+            </div>
 
-    {{ include('chantier/_delete_form.html.twig') }}
+            <div class="mb-3">
+                {{ form_label(form.status, 'Statut', {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(form.status, {'attr': {'class': 'form-select'}}) }}
+            </div>
+
+            <h3 class="mt-4 text-secondary">Compétences requises :</h3>
+            <div class="mb-3">
+                {{ form_label(form.competences, 'Sélectionnez les Compétences', {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(form.competences, {'attr': {'class': 'form-select', 'multiple': 'multiple'}}) }}
+            </div>
+
+            <div class="text-center">
+                <button type="submit" class="btn btn-warning btn-lg">
+                    <i class="fas fa-edit"></i> Mettre à Jour
+                </button>
+            </div>
+
+            {{ form_end(form) }}
+
+            <div class="text-center mt-4">
+                <a href="{{ path('app_chantier_index') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Retour à la liste
+                </a>
+                {{ include('chantier/_delete_form.html.twig') }}
+            </div>
+        </div>
+    </div>
+
+
 {% endblock %}

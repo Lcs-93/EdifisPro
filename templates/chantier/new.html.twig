@@ -1,19 +1,56 @@
 {% extends 'base.html.twig' %}
 
 {% block body %}
-    <h1>Créer un Chantier</h1>
+    <div class="container mt-5">
+        <div class="card shadow-lg p-4">
+            <h1 class="text-center text-primary mb-4"><i class="fas fa-hard-hat"></i> Créer un Chantier</h1>
 
-    {{ form_start(form) }}
-        {{ form_row(form.lieu) }}
-        {{ form_row(form.dateDebut) }}
-        {{ form_row(form.dateFin) }}
-        {{ form_row(form.status) }}
+            {{ form_start(form) }}
+            
+            <div class="mb-3">
+                {{ form_label(form.lieu, 'Adresse du Chantier', {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(form.lieu, {'attr': {'class': 'form-control', 'placeholder': 'Ex: Paris, Lyon...'}}) }}
+            </div>
 
-        <h3>Compétences requises :</h3>
-        <div>
-            {{ form_widget(form.competences) }}
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    {{ form_label(form.dateDebut, 'Date de Début', {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.dateDebut, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_errors(form.dateDebut) }}
+                </div>
+                <div class="col-md-6 mb-3">
+                    {{ form_label(form.dateFin, 'Date de Fin', {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.dateFin, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_errors(form.dateFin) }}
+                </div>
+            </div>
+
+            <div class="mb-3">
+                {{ form_label(form.status, 'Statut', {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(form.status, {'attr': {'class': 'form-select'}}) }}
+            </div>
+
+            <h3 class="mt-4 text-secondary"><i class="fas fa-tools"></i> Compétences requises :</h3>
+            <div class="card p-3">
+                <div class="row">
+                    {% for choice in form.competences %}
+                        <div class="col-md-4">
+                            <div class="form-check">
+                                {{ form_widget(choice, {'attr': {'class': 'form-check-input'}}) }}
+                                {{ form_label(choice, null, {'label_attr': {'class': 'form-check-label'}}) }}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="text-center mt-4">
+                <button type="submit" class="btn btn-success btn-lg">
+                    <i class="fas fa-save"></i> Créer le Chantier
+                </button>
+            </div>
+
+            {{ form_end(form) }}
         </div>
-
-        <button type="submit" class="btn btn-success">Créer</button>
-    {{ form_end(form) }}
+    </div>
 {% endblock %}

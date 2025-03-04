@@ -1,41 +1,121 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Chantier index{% endblock %}
+{% block title %}Gestion des Chantiers{% endblock %}
 
 {% block body %}
-    <h1>Chantier index</h1>
+    <div class="container mt-5">
+        <div class="card shadow-lg p-4">
+            <h1 class="text-center text-primary mb-4">
+                <i class="fas fa-hard-hat"></i> Gestion des Chantiers
+            </h1>
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Id</th>
-                <th>Lieu</th>
-                <th>DateDebut</th>
-                <th>DateFin</th>
-                <th>Status</th>
-                <th>actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for chantier in chantiers %}
-            <tr>
-                <td>{{ chantier.id }}</td>
-                <td>{{ chantier.lieu }}</td>
-                <td>{{ chantier.dateDebut ? chantier.dateDebut|date('Y-m-d H:i:s') : '' }}</td>
-                <td>{{ chantier.dateFin ? chantier.dateFin|date('Y-m-d H:i:s') : '' }}</td>
-                <td>{{ chantier.status }}</td>
-                <td>
-                    <a href="{{ path('app_chantier_show', {'id': chantier.id}) }}">show</a>
-                    <a href="{{ path('app_chantier_edit', {'id': chantier.id}) }}">edit</a>
-                </td>
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="6">no records found</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+            <!-- Filtres -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <input type="text" id="searchLieu" class="form-control" placeholder="🔍 Rechercher par lieu...">
+                </div>
+                <div class="col-md-4">
+                    <select id="filterStatus" class="form-select">
+                        <option value="">📌 Filtrer par statut</option>
+                        <option value="En cours">⚠️ En cours</option>
+                        <option value="En pause">⏸️ En pause</option>
+                        <option value="Terminé">✅ Terminé</option>
+                    </select>
+                </div>
+                <div class="col-md-2 text-end">
+                    <a href="{{ path('app_chantier_new') }}" class="btn btn-success btn-lg">
+                        <i class="fas fa-plus-circle"></i> Ajouter
+                    </a>
+                </div>
+            </div>
 
-    <a href="{{ path('app_chantier_new') }}">Create new</a>
+            <!-- Tableau des Chantiers -->
+            <div class="table-responsive">
+                <table class="table table-hover table-striped align-middle" id="chantierTable">
+                    <thead class="table-dark text-center">
+                        <tr>
+                            <th><i class="fas fa-hashtag"></i> ID</th>
+                            <th><i class="fas fa-map-marker-alt"></i> Adresse</th>
+                            <th><i class="fas fa-calendar-day"></i> Date Début</th>
+                            <th><i class="fas fa-calendar-check"></i> Date Fin</th>
+                            <th><i class="fas fa-tasks"></i> Status</th>
+                            <th><i class="fas fa-cogs"></i> Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for chantier in chantiers %}
+                            <tr class="text-center chantier-row">
+                                <td><strong>{{ chantier.id }}</strong></td>
+                                <td class="chantier-lieu">{{ chantier.lieu }}</td>
+                                <td>{{ chantier.dateDebut ? chantier.dateDebut|date('d/m/Y H:i') : '' }}</td>
+                                <td>{{ chantier.dateFin ? chantier.dateFin|date('d/m/Y H:i') : '' }}</td>
+                                <td class="chantier-status">
+                                    {% if chantier.status == 'en_cours' %}
+                                        <span class="badge bg-warning text-dark">⚠️ En cours</span>
+                                    {% elseif chantier.status == 'en_pause' %}
+                                        <span class="badge bg-secondary">⏸️ En pause</span>
+                                    {% elseif chantier.status == 'termine' %}
+                                        <span class="badge bg-success">✅ Terminé</span>
+                                    {% else %}
+                                        <span class="badge bg-light text-dark">Inconnu</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{{ path('app_chantier_show', {'id': chantier.id}) }}" class="btn btn-info btn-sm me-1" title="Voir">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{{ path('app_chantier_edit', {'id': chantier.id}) }}" class="btn btn-warning btn-sm me-1" title="Modifier">
+                                        <i class="fas fa-pencil-alt"></i>
+                                    </a>
+                               
+                               
+                                    <form method="post" action="{{ path('app_chantier_delete', {'id': chantier.id}) }}" onsubmit="return confirm('Voulez-vous vraiment supprimer ce chantier ?');" class="d-inline">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ chantier.id) }}">
+                                        <button class="btn btn-danger btn-sm" title="Supprimer">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="6" class="text-center text-muted">Aucun chantier trouvé</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script de filtrage -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const searchLieu = document.getElementById("searchLieu");
+            const filterStatus = document.getElementById("filterStatus");
+            const rows = document.querySelectorAll(".chantier-row");
+
+            function filterTable() {
+                const searchValue = searchLieu.value.toLowerCase();
+                const statusValue = filterStatus.value.toLowerCase();
+
+                rows.forEach(row => {
+                    const lieu = row.querySelector(".chantier-lieu").textContent.toLowerCase();
+                    const status = row.querySelector(".chantier-status").textContent.toLowerCase();
+
+                    const matchesLieu = lieu.includes(searchValue);
+                    const matchesStatus = statusValue === "" || status.includes(statusValue);
+
+                    if (matchesLieu && matchesStatus) {
+                        row.style.display = "";
+                    } else {
+                        row.style.display = "none";
+                    }
+                });
+            }
+
+            searchLieu.addEventListener("input", filterTable);
+            filterStatus.addEventListener("change", filterTable);
+        });
+    </script>
 {% endblock %}

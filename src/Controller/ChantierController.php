@@ -97,14 +97,19 @@ public function index(ChantierRepository $chantierRepository): Response
 }
 
 
-    #[Route('/{id}', name: 'app_chantier_delete', methods: ['POST'])]
-    public function delete(Request $request, Chantier $chantier, EntityManagerInterface $entityManager): Response
-    {
-        if ($this->isCsrfTokenValid('delete'.$chantier->getId(), $request->getPayload()->getString('_token'))) {
-            $entityManager->remove($chantier);
-            $entityManager->flush();
+#[Route('/{id}', name: 'app_chantier_delete', methods: ['POST'])]
+public function delete(Request $request, Chantier $chantier, EntityManagerInterface $entityManager): Response
+{
+    if ($this->isCsrfTokenValid('delete'.$chantier->getId(), $request->request->get('_token'))) {
+        foreach ($chantier->getCompetenceChantiers() as $competenceChantier) {
+            $entityManager->remove($competenceChantier);
         }
 
-        return $this->redirectToRoute('app_chantier_index', [], Response::HTTP_SEE_OTHER);
+        $entityManager->remove($chantier);
+        $entityManager->flush();
     }
+
+    return $this->redirectToRoute('app_chantier_index');
+}
+
 }
