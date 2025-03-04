@@ -3,7 +3,6 @@
 namespace App\Entity;
 
 use App\Repository\EquipeUserRepository;
-use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: EquipeUserRepository::class)]
@@ -14,16 +13,16 @@ class EquipeUser
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(inversedBy: 'equipeUsers')]
+    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'equipeUsers')]
     private ?User $utilisateur = null;
 
-    #[ORM\ManyToOne(inversedBy: 'equipeUsers')]
+    #[ORM\ManyToOne(targetEntity: Equipe::class, inversedBy: 'equipeUsers')]
     private ?Equipe $equipe = null;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[ORM\Column(type: 'datetime')]
     private ?\DateTimeInterface $dateDebut = null;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[ORM\Column(type: 'datetime', nullable: true)]
     private ?\DateTimeInterface $dateFin = null;
 
     public function getId(): ?int
@@ -39,7 +38,6 @@ class EquipeUser
     public function setUtilisateur(?User $utilisateur): static
     {
         $this->utilisateur = $utilisateur;
-
         return $this;
     }
 
@@ -51,7 +49,6 @@ class EquipeUser
     public function setEquipe(?Equipe $equipe): static
     {
         $this->equipe = $equipe;
-
         return $this;
     }
 
@@ -63,7 +60,6 @@ class EquipeUser
     public function setDateDebut(\DateTimeInterface $dateDebut): static
     {
         $this->dateDebut = $dateDebut;
-
         return $this;
     }
 
@@ -72,10 +68,9 @@ class EquipeUser
         return $this->dateFin;
     }
 
-    public function setDateFin(\DateTimeInterface $dateFin): static
+    public function setDateFin(?\DateTimeInterface $dateFin): static
     {
         $this->dateFin = $dateFin;
-
         return $this;
     }
 }

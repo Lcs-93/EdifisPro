@@ -18,25 +18,16 @@ class Equipe
     #[ORM\Column(length: 255)]
     private ?string $nomEquipe = null;
 
-    #[ORM\ManyToOne(inversedBy: 'equipes')]
+    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'equipes')]
     private ?User $chefEquipe = null;
 
-    /**
-     * @var Collection<int, EquipeUser>
-     */
+    /** @var Collection<int, EquipeUser> */
     #[ORM\OneToMany(targetEntity: EquipeUser::class, mappedBy: 'equipe')]
     private Collection $equipeUsers;
-
-    /**
-     * @var Collection<int, Affectation>
-     */
-    #[ORM\OneToMany(targetEntity: Affectation::class, mappedBy: 'equipe')]
-    private Collection $affectations;
 
     public function __construct()
     {
         $this->equipeUsers = new ArrayCollection();
-        $this->affectations = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -52,7 +43,6 @@ class Equipe
     public function setNomEquipe(string $nomEquipe): static
     {
         $this->nomEquipe = $nomEquipe;
-
         return $this;
     }
 
@@ -64,13 +54,9 @@ class Equipe
     public function setChefEquipe(?User $chefEquipe): static
     {
         $this->chefEquipe = $chefEquipe;
-
         return $this;
     }
 
-    /**
-     * @return Collection<int, EquipeUser>
-     */
     public function getEquipeUsers(): Collection
     {
         return $this->equipeUsers;
@@ -82,7 +68,6 @@ class Equipe
             $this->equipeUsers->add($equipeUser);
             $equipeUser->setEquipe($this);
         }
-
         return $this;
     }
 
@@ -94,37 +79,6 @@ class Equipe
                 $equipeUser->setEquipe(null);
             }
         }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Affectation>
-     */
-    public function getAffectations(): Collection
-    {
-        return $this->affectations;
-    }
-
-    public function addAffectation(Affectation $affectation): static
-    {
-        if (!$this->affectations->contains($affectation)) {
-            $this->affectations->add($affectation);
-            $affectation->setEquipe($this);
-        }
-
-        return $this;
-    }
-
-    public function removeAffectation(Affectation $affectation): static
-    {
-        if ($this->affectations->removeElement($affectation)) {
-            // set the owning side to null (unless already changed)
-            if ($affectation->getEquipe() === $this) {
-                $affectation->setEquipe(null);
-            }
-        }
-
         return $this;
     }
 }

@@ -1,0 +1,11 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}New EquipeUser{% endblock %}
+
+{% block body %}
+    <h1>Create new EquipeUser</h1>
+
+    {{ include('equipe_user/_form.html.twig') }}
+
+    <a href="{{ path('app_equipe_user_index') }}">back to list</a>
+{% endblock %}
