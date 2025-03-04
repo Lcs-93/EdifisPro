@@ -1,0 +1,27 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier une compétence{% endblock %}
+
+{% block body %}
+    <h1>Modifier une compétence</h1>
+
+    <!-- Affichage des messages flash (erreur ou succès) -->
+    {% for message in app.flashes('error') %}
+        <div class="alert alert-danger">
+            {{ message }}
+        </div>
+    {% endfor %}
+
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success">
+            {{ message }}
+        </div>
+    {% endfor %}
+
+    {{ form_start(form) }}
+        {{ form_row(form.nomCompetence) }}
+        <button type="submit" class="btn btn-success">{{ button_label|default('Mettre à jour') }}</button>
+    {{ form_end(form) }}
+
+    <a href="{{ path('app_competence_index') }}" class="btn btn-secondary">Retour à la liste</a>
+{% endblock %}

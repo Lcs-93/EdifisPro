@@ -1,0 +1,39 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des compétences{% endblock %}
+
+{% block body %}
+    <h1>Liste des compétences</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nom de la compétence</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for competence in competences %}
+            <tr>
+                <td>{{ competence.id }}</td>
+                <td>{{ competence.nomCompetence }}</td>
+                <td>
+                    <a href="{{ path('app_competence_show', {'id': competence.id}) }}" class="btn btn-info">Voir</a>
+                    <a href="{{ path('app_competence_edit', {'id': competence.id}) }}" class="btn btn-warning">Modifier</a>
+                    <form action="{{ path('app_competence_delete', {'id': competence.id}) }}" method="POST" style="display:inline-block;">
+                        <button class="btn btn-danger" type="submit" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette compétence ?')">Supprimer</button>
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ competence.id) }}">
+                    </form>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="3">Aucune compétence trouvée</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_competence_new') }}" class="btn btn-success">Ajouter une compétence</a>
+{% endblock %}
