@@ -1,0 +1,19 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h1>Créer un Chantier</h1>
+
+    {{ form_start(form) }}
+        {{ form_row(form.lieu) }}
+        {{ form_row(form.dateDebut) }}
+        {{ form_row(form.dateFin) }}
+        {{ form_row(form.status) }}
+
+        <h3>Compétences requises :</h3>
+        <div>
+            {{ form_widget(form.competences) }}
+        </div>
+
+        <button type="submit" class="btn btn-success">Créer</button>
+    {{ form_end(form) }}
+{% endblock %}
