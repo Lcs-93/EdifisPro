@@ -16,7 +16,7 @@
                 <td>{{ user.nom }}</td>
             </tr>
             <tr>
-                <th>Prenom</th>
+                <th>Prénom</th>
                 <td>{{ user.prenom }}</td>
             </tr>
             <tr>
@@ -29,12 +29,15 @@
             </tr>
             <tr>
                 <th>Rôle</th>
-                <td>{{ user.role ? user.role.nom : 'Aucun' }}</td>
+                <td>{% for role in user.roles %}
+                        {{ role }}
+                    {% endfor %}</td>
+                <td>
             </tr>
         </tbody>
     </table>
 
-    <a href="{{ path('app_user_index') }}">back to list</a>
+    <a href="{{ path('app_user_list') }}">back to list</a>
 
     <a href="{{ path('app_user_edit', {'id': user.id}) }}">edit</a>
 
