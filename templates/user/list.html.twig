@@ -12,7 +12,7 @@
             <th>Nom</th>
             <th>Prénom</th>
             <th>Email</th>
-            <th>Password</th>
+            <th>Mot de passe</th>
             <th>Rôle</th>
             <th>Compétences</th>
             <th>actions</th>
@@ -30,17 +30,17 @@
                         {{ role }}
                     {% endfor %}</td>
                 <td>
-                    <a href="{{ path('app_user_show', {'id': user.id}) }}">show</a>
-                    <a href="{{ path('app_user_edit', {'id': user.id}) }}">edit</a>
+                    <a href="{{ path('app_user_show', {'id': user.id}) }}">afficher</a>
+                    <a href="{{ path('app_user_edit', {'id': user.id}) }}">modifier</a>
                 </td>
             </tr>
         {% else %}
             <tr>
-                <td colspan="6">no records found</td>
+                <td colspan="6">Aucun utilisateur trouvé</td>
             </tr>
         {% endfor %}
         </tbody>
     </table>
 
-    <a href="{{ path('app_user_new') }}">Create new</a>
+    <a href="{{ path('app_user_new') }}">Créer un utilisateur</a>
 {% endblock %}
