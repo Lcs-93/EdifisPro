@@ -1,0 +1,28 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Compétence{% endblock %}
+
+{% block body %}
+    <h1>Compétence: {{ competence.nomCompetence }}</h1>
+
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ competence.id }}</td>
+            </tr>
+            <tr>
+                <th>Nom de la compétence</th>
+                <td>{{ competence.nomCompetence }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_competence_edit', {'id': competence.id}) }}" class="btn btn-warning">Modifier</a>
+    <form action="{{ path('app_competence_delete', {'id': competence.id}) }}" method="POST" style="display:inline-block;">
+        <button class="btn btn-danger" type="submit" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette compétence ?')">Supprimer</button>
+        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ competence.id) }}">
+    </form>
+
+    <a href="{{ path('app_competence_index') }}" class="btn btn-secondary">Retour à la liste</a>
+{% endblock %}
