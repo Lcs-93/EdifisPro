@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: ChantierRepository::class)]
 class Chantier
@@ -17,27 +18,36 @@ class Chantier
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: "Le lieu du chantier est obligatoire.")]
     private ?string $lieu = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[Assert\NotNull(message: "La date de début est obligatoire.")]
     private ?\DateTimeInterface $dateDebut = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[Assert\NotNull(message: "La date de fin est obligatoire.")]
+    #[Assert\GreaterThanOrEqual(
+        propertyPath: "dateDebut",
+        message: "La date de fin doit être postérieure ou égale à la date de début."
+    )]
     private ?\DateTimeInterface $dateFin = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: "Le statut du chantier est obligatoire.")]
+    #[Assert\Choice(choices: ['en_cours', 'en_pause', 'termine'], message: "Choisissez un statut valide.")]
     private ?string $status = null;
 
     /**
      * @var Collection<int, CompetenceChantier>
      */
-    #[ORM\OneToMany(targetEntity: CompetenceChantier::class, mappedBy: 'chantier')]
+    #[ORM\OneToMany(targetEntity: CompetenceChantier::class, mappedBy: 'chantier', cascade: ['remove'], orphanRemoval: true)]
     private Collection $competenceChantiers;
 
     /**
      * @var Collection<int, Affectation>
      */
-    #[ORM\OneToMany(targetEntity: Affectation::class, mappedBy: 'chantier')]
+    #[ORM\OneToMany(targetEntity: Affectation::class, mappedBy: 'chantier', cascade: ['remove'], orphanRemoval: true)]
     private Collection $affectations;
 
     public function __construct()
@@ -59,7 +69,6 @@ class Chantier
     public function setLieu(string $lieu): static
     {
         $this->lieu = $lieu;
-
         return $this;
     }
 
@@ -71,7 +80,6 @@ class Chantier
     public function setDateDebut(\DateTimeInterface $dateDebut): static
     {
         $this->dateDebut = $dateDebut;
-
         return $this;
     }
 
@@ -83,7 +91,6 @@ class Chantier
     public function setDateFin(\DateTimeInterface $dateFin): static
     {
         $this->dateFin = $dateFin;
-
         return $this;
     }
 
@@ -95,7 +102,6 @@ class Chantier
     public function setStatus(string $status): static
     {
         $this->status = $status;
-
         return $this;
     }
 
@@ -113,19 +119,16 @@ class Chantier
             $this->competenceChantiers->add($competenceChantier);
             $competenceChantier->setChantier($this);
         }
-
         return $this;
     }
 
     public function removeCompetenceChantier(CompetenceChantier $competenceChantier): static
     {
         if ($this->competenceChantiers->removeElement($competenceChantier)) {
-            // set the owning side to null (unless already changed)
             if ($competenceChantier->getChantier() === $this) {
                 $competenceChantier->setChantier(null);
             }
         }
-
         return $this;
     }
 
@@ -143,19 +146,16 @@ class Chantier
             $this->affectations->add($affectation);
             $affectation->setChantier($this);
         }
-
         return $this;
     }
 
     public function removeAffectation(Affectation $affectation): static
     {
         if ($this->affectations->removeElement($affectation)) {
-            // set the owning side to null (unless already changed)
             if ($affectation->getChantier() === $this) {
                 $affectation->setChantier(null);
             }
         }
-
         return $this;
     }
 }

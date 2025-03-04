@@ -12,6 +12,7 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 
 class ChantierType extends AbstractType
 {
@@ -21,7 +22,16 @@ class ChantierType extends AbstractType
             ->add('lieu')
             ->add('dateDebut')
             ->add('dateFin')
-            ->add('status')
+            ->add('status', ChoiceType::class, [
+                'choices'  => [
+                    'En cours' => 'en_cours',
+                    'En pause' => 'en_pause',
+                    'Terminé' => 'termine',
+                ],
+                'expanded' => false, // Affiche un menu déroulant
+                'multiple' => false, // Permet de ne choisir qu'une seule option
+                'attr' => ['class' => 'form-select'] // Bootstrap stylise le select
+            ])
             ->add('competences', EntityType::class, [
                 'class' => Competence::class,
                 'choice_label' => 'nomCompetence',
@@ -29,10 +39,6 @@ class ChantierType extends AbstractType
                 'expanded' => true, 
                 'mapped' => false, 
                 'required' => false,
-            ])
-            ->add('save', SubmitType::class, [
-                'label' => 'Enregistrer le chantier',
-                'attr' => ['class' => 'btn btn-primary']
             ]);
     }
 
