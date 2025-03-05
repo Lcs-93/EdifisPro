@@ -19,7 +19,7 @@ use App\Form\UserEditFormType; // ✅ Correct
 final class UserController extends AbstractController
 {
 	// Route pour le dashboard de l'utilisateur
-	#[Route('/user', name: 'user_dashboard')]
+	#[Route('', name: 'user_dashboard')]
 	public function index(): Response
 	{
 		// Vérifie que l'utilisateur a bien le rôle ROLE_USER
