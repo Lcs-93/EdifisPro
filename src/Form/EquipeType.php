@@ -4,14 +4,12 @@ namespace App\Form;
 
 use App\Entity\Equipe;
 use App\Entity\User;
-use Doctrine\ORM\EntityRepository;
-use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
-
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
+use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Doctrine\ORM\EntityRepository;
 
 class EquipeType extends AbstractType
 {
@@ -40,7 +38,7 @@ class EquipeType extends AbstractType
                 },
                 'required' => false,
                 'label' => 'Chef d\'équipe',
-                'placeholder' => 'Sélectionner un chef d\'équipe', 
+                'placeholder' => 'Sélectionner un chef d\'équipe',
                 'attr' => ['class' => 'form-select']
             ])
             ->add('membres', EntityType::class, [
@@ -50,10 +48,14 @@ class EquipeType extends AbstractType
                 },
                 'label' => 'Membres de l\'équipe',
                 'multiple' => true,
-                'expanded' => true, 
-                'mapped' => false, 
+                'expanded' => true,
+                'mapped' => false,
+                'query_builder' => function (EntityRepository $er) {
+                    return $er->createQueryBuilder('u')
+                        ->where('u.roles NOT LIKE :role')  // Exclure les administrateurs
+                        ->setParameter('role', '%ROLE_ADMIN%');
+                },
             ]);
-     
     }
 
     public function configureOptions(OptionsResolver $resolver): void

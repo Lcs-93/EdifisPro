@@ -60,7 +60,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->competenceUsers = new ArrayCollection();
         $this->equipes = new ArrayCollection();
         $this->equipeUsers = new ArrayCollection();
-        $this->roles = ['ROLE_USER']; // Rôle par défaut
+        
     }
 
     public function getId(): ?int
@@ -104,7 +104,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getRoles(): array
     {
         $roles = $this->roles;
-        $roles[] = 'ROLE_USER'; // S'assurer que chaque utilisateur a au moins ce rôle
+         // S'assurer que chaque utilisateur a au moins ce rôle
         return array_unique($roles);
     }
 

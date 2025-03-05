@@ -19,20 +19,21 @@
                 {{ form_widget(form.chefEquipe, {'attr': {'class': 'form-select custom-input'}}) }}
             </div>
 
-            <!-- Membres de l'équipe -->
-            <h3 class="mt-4 text-secondary fw-bold">👥 Membres de l'équipe :</h3>
-            <div class="card p-3 mb-3 glassmorphism-subcard">
-                <div class="row">
-                    {% for membre in form.membres %}
-                        <div class="col-md-4 mb-2">
-                            <div class="form-check custom-checkbox">
-                                {{ form_widget(membre, {'attr': {'class': 'form-check-input'}}) }}
-                                {{ form_label(membre, null, {'label_attr': {'class': 'form-check-label'}}) }}
-                            </div>
-                        </div>
-                    {% endfor %}
+<!-- Membres de l'équipe -->
+<h3 class="mt-4 text-secondary fw-bold">👥 Membres de l'équipe :</h3>
+<div class="card p-3 mb-3 glassmorphism-subcard">
+    <div class="row">
+        {% for membre in form.membres %}
+            <div class="col-md-4 mb-2">
+                <div class="form-check custom-checkbox">
+                    {{ form_widget(membre, {'attr': {'class': 'form-check-input'}}) }}
+                    {{ form_label(membre, null, {'label_attr': {'class': 'form-check-label'}}) }}
+                    {{ form_errors(membre) }} <!-- Afficher les erreurs de validation -->
                 </div>
             </div>
+        {% endfor %}
+    </div>
+</div>
 
             <!-- Dates -->
             <h3 class="mt-4 text-secondary fw-bold">📅 Dates d'affectation :</h3>

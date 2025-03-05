@@ -29,13 +29,20 @@ final class EquipeController extends AbstractController
     {
         $equipe = new Equipe();
         $form = $this->createForm(EquipeType::class, $equipe);
+        
+        // Récupérer les utilisateurs non administrateurs
+        $users = $userRepository->findAll();
+        $nonAdminUsers = array_filter($users, function($user) {
+            return !in_array('ROLE_ADMIN', $user->getRoles());  // Assurez-vous d'exclure les admins
+        });
+    
         $form->handleRequest($request);
-
+    
         if ($form->isSubmitted() && $form->isValid()) {
             $selectedUsers = $form->get('membres')->getData();
             $dateDebut = $form->get('dateDebut')->getData();
             $dateFin = $form->get('dateFin')->getData();
-
+    
             foreach ($selectedUsers as $user) {
                 // Vérifier si l'utilisateur est déjà affecté dans cette période
                 $existingAssignments = $user->getEquipeUsers();
@@ -45,25 +52,26 @@ final class EquipeController extends AbstractController
                         return $this->redirectToRoute('app_equipe_new');
                     }
                 }
-
+    
                 $equipeUser = new EquipeUser();
                 $equipeUser->setUtilisateur($user);
                 $equipeUser->setEquipe($equipe);
                 $equipeUser->setDateDebut($dateDebut);
                 $equipeUser->setDateFin($dateFin);
-
+    
                 $entityManager->persist($equipeUser);
             }
-
+    
             $entityManager->persist($equipe);
             $entityManager->flush();
-
+    
             return $this->redirectToRoute('app_equipe_index');
         }
-
+    
         return $this->render('equipe/new.html.twig', [
             'equipe' => $equipe,
             'form' => $form->createView(),
+            'users' => $nonAdminUsers,  // Passer les utilisateurs filtrés au formulaire
         ]);
     }
 
