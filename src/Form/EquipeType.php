@@ -40,7 +40,7 @@ class EquipeType extends AbstractType
                 },
                 'required' => false,
                 'label' => 'Chef d\'équipe',
-                'placeholder' => 'Sélectionner un chef d\'équipe', // Optionnel
+                'placeholder' => 'Sélectionner un chef d\'équipe', 
                 'attr' => ['class' => 'form-select']
             ])
             ->add('membres', EntityType::class, [
@@ -50,13 +50,10 @@ class EquipeType extends AbstractType
                 },
                 'label' => 'Membres de l\'équipe',
                 'multiple' => true,
-                'expanded' => true, // ✅ Affichage en checkbox
-                'mapped' => false, // Géré manuellement dans le controller
-            ])
-            ->add('save', SubmitType::class, [
-                'label' => 'Enregistrer',
-                'attr' => ['class' => 'btn btn-success']
+                'expanded' => true, 
+                'mapped' => false, 
             ]);
+     
     }
 
     public function configureOptions(OptionsResolver $resolver): void

@@ -1,39 +1,45 @@
 {% extends 'base.html.twig' %}
 
 {% block body %}
-    <div class="container mt-5">
-        <div class="card shadow-lg p-4">
-            <h1 class="text-center text-primary mb-4">Modifier l'Équipe</h1>
+    <div class="container mt-5 d-flex justify-content-center">
+        <div class="card glassmorphism-card shadow-lg p-4">
+            <h1 class="text-center text-primary mb-4">🔄 Modifier l'Équipe</h1>
 
             {{ form_start(form) }}
 
-            <div class="mb-3">
-                {{ form_label(form.nomEquipe) }}
-                {{ form_widget(form.nomEquipe, {'attr': {'class': 'form-control'}}) }}
+            <div class="mb-4">
+                {{ form_label(form.nomEquipe, 'Nom de l\'équipe', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                {{ form_widget(form.nomEquipe, {'attr': {'class': 'form-control custom-input'}}) }}
+            </div>
+      <div class="mb-4">
+                {{ form_label(form.chefEquipe, 'Chef d\'équipe', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                {{ form_widget(form.chefEquipe, {'attr': {'class': 'form-select custom-input'}}) }}
             </div>
 
-    <div class="row">
-    <div class="col-md-6 mb-3">
-        {{ form_label(form.dateDebut, 'Date de Début') }}
-        {{ form_widget(form.dateDebut, {'attr': {'class': 'form-control'}}) }}
-        {{ form_errors(form.dateDebut) }} {# Affiche les erreurs de validation #}
-    </div>
-    <div class="col-md-6 mb-3">
-        {{ form_label(form.dateFin, 'Date de Fin') }}
-        {{ form_widget(form.dateFin, {'attr': {'class': 'form-control'}}) }}
-        {{ form_errors(form.dateFin) }} {# Affiche les erreurs de validation #}
-    </div>
-</div>
+            <h3 class="mt-4 text-secondary fw-bold">📅 Dates d'affectation :</h3>
+            <div class="card p-3 mb-3 glassmorphism-subcard">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        {{ form_label(form.dateDebut, 'Date de Début', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                        {{ form_widget(form.dateDebut, {'attr': {'class': 'form-control custom-input'}}) }}
+                        {{ form_errors(form.dateDebut) }}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        {{ form_label(form.dateFin, 'Date de Fin', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                        {{ form_widget(form.dateFin, {'attr': {'class': 'form-control custom-input'}}) }}
+                        {{ form_errors(form.dateFin) }}
+                    </div>
+                </div>
+            </div>
 
-
-            <h3 class="mt-4 text-secondary">Membres de l'équipe</h3>
+            <h3 class="mt-4 text-secondary fw-bold">👥 Gestion des membres :</h3>
             <div class="row">
                 <div class="col-md-6">
-                    <h5>Membres actuels</h5>
-                    <div class="card p-3">
+                    <h5 class="text-success">✅ Membres actuels</h5>
+                    <div class="card p-3 mb-3 glassmorphism-subcard">
                         {% for membre in form.membres %}
                             {% if membre.vars.data in currentMembers %}
-                                <div class="form-check">
+                                <div class="form-check custom-checkbox">
                                     {{ form_widget(membre, {'attr': {'class': 'form-check-input', 'checked': 'checked'}}) }}
                                     {{ form_label(membre, null, {'label_attr': {'class': 'form-check-label'}}) }}
                                 </div>
@@ -43,11 +49,11 @@
                 </div>
 
                 <div class="col-md-6">
-                    <h5>Utilisateurs disponibles</h5>
-                    <div class="card p-3">
+                    <h5 class="text-warning">⚡ Utilisateurs disponibles</h5>
+                    <div class="card p-3 mb-3 glassmorphism-subcard">
                         {% for membre in form.membres %}
                             {% if membre.vars.data not in currentMembers %}
-                                <div class="form-check">
+                                <div class="form-check custom-checkbox">
                                     {{ form_widget(membre, {'attr': {'class': 'form-check-input'}}) }}
                                     {{ form_label(membre, null, {'label_attr': {'class': 'form-check-label'}}) }}
                                 </div>
@@ -57,9 +63,12 @@
                 </div>
             </div>
 
-            <button type="submit" class="btn btn-success btn-lg mt-3">
-                <i class="fas fa-save"></i> Mettre à jour
-            </button>
+            <!-- Bouton d'enregistrement -->
+            <div class="text-center">
+                <button type="submit" class="btn btn-glass btn-lg">
+                    <i class="fas fa-save"></i> Mettre à jour
+                </button>
+            </div>
 
             {{ form_end(form) }}
         </div>
@@ -77,10 +86,82 @@
 
             if (dateFin <= dateDebut) {
                 event.preventDefault();
-                alert("La date de fin doit être postérieure à la date de début !");
+                alert("⚠️ La date de fin doit être postérieure à la date de début !");
             }
         });
     });
-</script>
+    </script>
 
+    <!-- 🟢 STYLES CSS -->
+    <style>
+        /* 🌟 Glassmorphism Style */
+        .glassmorphism-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0px 10px 30px rgba(255, 255, 255, 0.2);
+            max-width: 800px;
+            width: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .glassmorphism-subcard {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+        }
+
+        /* 🌟 Inputs améliorés */
+        .custom-input {
+            border-radius: 10px;
+            padding: 12px;
+            font-size: 16px;
+            background: rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease-in-out;
+            box-shadow: inset 0px 0px 8px rgba(255, 255, 255, 0.3);
+            color: black;
+        }
+
+   
+
+        /* 🌟 Checkbox custom */
+        .custom-checkbox .form-check-input {
+            transform: scale(1.3);
+            margin-right: 8px;
+            border: 2px solid rgba(0, 0, 0, 0.4);
+        }
+
+        /* 🌟 Bouton Glassmorphism */
+        .btn-glass {
+            background: linear-gradient(45deg, #00d4ff, #007bff);
+            border: none;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+            transition: all 0.3s ease-in-out;
+            box-shadow: 0px 4px 20px rgba(0, 212, 255, 0.4);
+            text-transform: uppercase;
+        }
+
+        .btn-glass:hover {
+            background: linear-gradient(45deg, #0096c7, #0056b3);
+            box-shadow: 0px 6px 25px rgba(0, 212, 255, 0.6);
+            transform: scale(1.05);
+        }
+
+        /* 🌟 Animation Fade In */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .glassmorphism-card {
+            animation: fadeIn 0.8s ease-in-out;
+        }
+    </style>
 {% endblock %}

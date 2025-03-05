@@ -1,51 +1,58 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Liste des Équipes{% endblock %}
+{% block title %}Gestion des Équipes{% endblock %}
 
 {% block body %}
     <div class="container mt-5">
-        <div class="card shadow-lg p-4">
-            <h1 class="text-center text-primary mb-4">Liste des Équipes</h1>
+        <div class="card shadow-lg p-4 animated-card">
+            <h1 class="text-center text-primary mb-4">👥 Gestion des Équipes</h1>
 
-            <!-- Barre de recherche -->
+            <!-- 🔍 Filtres -->
             <div class="row mb-4">
-                <div class="col-md-6">
-                    <input type="text" id="searchInput" class="form-control" placeholder="Rechercher une équipe..." onkeyup="filterTeams()">
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <input type="text" id="searchInput" class="form-control search-bar" placeholder="Rechercher une équipe..." onkeyup="filterTeams()">
+                        <span class="input-group-text"><i class="fas fa-search"></i></span>
+                    </div>
                 </div>
-                <div class="col-md-6 text-end">
-                    <a href="{{ path('app_equipe_new') }}" class="btn btn-success btn-lg">
+                <div class="col-md-8 text-end">
+                    <a href="{{ path('app_equipe_new') }}" class="btn btn-gradient btn-lg">
                         <i class="fas fa-plus"></i> Ajouter une Équipe
                     </a>
                 </div>
             </div>
 
-            <!-- Tableau des Équipes -->
+            <!-- 🏆 Tableau des Équipes -->
             <div class="table-responsive">
-                <table class="table table-hover table-striped align-middle" id="teamTable">
-                    <thead class="table-dark text-center">
+                <table class="table custom-table" id="teamTable">
+                    <thead>
                         <tr>
                             <th>ID</th>
                             <th>Nom de l'Équipe</th>
-                            <th>Nombre de Membres</th>
+                            <th>Membres</th>
+                            <th>Date Début</th>
+                            <th>Date Fin</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for equipe in equipes %}
-                            <tr class="text-center">
+                            <tr class="table-row">
                                 <td><strong>{{ equipe.id }}</strong></td>
                                 <td class="team-name">{{ equipe.nomEquipe }}</td>
                                 <td>{{ equipe.equipeUsers|length }}</td>
-                                <td>
-                                    <a href="{{ path('app_equipe_show', {'id': equipe.id}) }}" class="btn btn-info btn-sm me-1">
+                                <td>{{ equipe.dateDebut|date("d/m/Y") }}</td>
+                                <td>{{ equipe.dateFin|date("d/m/Y") }}</td>
+                                <td class="actions">
+                                    <a href="{{ path('app_equipe_show', {'id': equipe.id}) }}" class="btn btn-circle btn-view">
                                         <i class="fas fa-eye"></i>
                                     </a>
-                                    <a href="{{ path('app_equipe_edit', {'id': equipe.id}) }}" class="btn btn-warning btn-sm me-1">
+                                    <a href="{{ path('app_equipe_edit', {'id': equipe.id}) }}" class="btn btn-circle btn-edit">
                                         <i class="fas fa-edit"></i>
                                     </a>
                                     <form method="post" action="{{ path('app_equipe_delete', {'id': equipe.id}) }}" onsubmit="return confirm('Voulez-vous vraiment supprimer cette équipe ?');" class="d-inline">
                                         <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ equipe.id) }}">
-                                        <button class="btn btn-danger btn-sm">
+                                        <button class="btn btn-circle btn-delete">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </form>
@@ -53,25 +60,147 @@
                             </tr>
                         {% else %}
                             <tr>
-                                <td colspan="4" class="text-center text-muted">Aucune équipe trouvée</td>
+                                <td colspan="6" class="text-center text-muted">Aucune équipe trouvée</td>
                             </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
+
+            <!-- Pagination -->
+            <div class="d-flex justify-content-center mt-3">
+                <button id="prevPage" class="btn btn-outline-primary me-2">⬅ Précédent</button>
+                <span id="pageNumber" class="align-self-center"></span>
+                <button id="nextPage" class="btn btn-outline-primary ms-2">Suivant ➡</button>
+            </div>
         </div>
     </div>
 
-    <!-- Script pour la recherche -->
+    <!-- Scripts pour la recherche, animation et pagination -->
     <script>
+        let currentPage = 1;
+        const rowsPerPage = 10;
+        let rows = document.querySelectorAll("#teamTable tbody tr");
+
         function filterTeams() {
             let input = document.getElementById("searchInput").value.toLowerCase();
-            let rows = document.querySelectorAll("#teamTable tbody tr");
-
             rows.forEach(row => {
                 let teamName = row.querySelector(".team-name").textContent.toLowerCase();
                 row.style.display = teamName.includes(input) ? "" : "none";
             });
         }
+
+        function showPage(page) {
+            let start = (page - 1) * rowsPerPage;
+            let end = start + rowsPerPage;
+            rows.forEach((row, index) => {
+                row.style.display = index >= start && index < end ? "" : "none";
+            });
+            document.getElementById("pageNumber").textContent = `Page ${page}`;
+        }
+
+        document.getElementById("prevPage").addEventListener("click", function() {
+            if (currentPage > 1) {
+                currentPage--;
+                showPage(currentPage);
+            }
+        });
+
+        document.getElementById("nextPage").addEventListener("click", function() {
+            if (currentPage < Math.ceil(rows.length / rowsPerPage)) {
+                currentPage++;
+                showPage(currentPage);
+            }
+        });
+
+        document.addEventListener("DOMContentLoaded", function() {
+            showPage(currentPage);
+        });
     </script>
+
+    <!-- 🟢 STYLES CSS -->
+    <style>
+        /* 🟢 Material UI Header */
+        .custom-table th {
+            background: black;
+            color: white;
+            padding: 14px;
+            border-bottom: 3px solid white;
+            text-align: center;
+        }
+.custom-table {
+    border-radius: 10px;
+}
+        /* 🟢 Material UI Table Design */
+        .custom-table {
+            border-collapse: separate;
+            border-spacing: 0 10px;
+            width: 100%;
+            background: #ffffff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+
+        .custom-table td {
+            background: #fafafa;
+            padding: 14px;
+            border: none;
+            text-align: center;
+            border-radius: 6px;
+        }
+
+        .custom-table tbody tr:hover {
+            background: rgba(0, 123, 255, 0.05);
+            transition: 0.3s;
+        }
+
+        /* 🟢 Boutons Modernes */
+        .btn-circle {
+            width: 40px;
+            height: 40px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-size: 18px;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .btn-view {
+            border-color: #2196f3;
+            color: #2196f3;
+        }
+        .btn-view:hover {
+            background: #2196f3;
+            color: white;
+            box-shadow: 0px 0px 10px rgba(33, 150, 243, 0.5);
+        }
+
+        .btn-edit {
+            border-color: #ff9800;
+            color: #ff9800;
+        }
+        .btn-edit:hover {
+            background: #ff9800;
+            color: white;
+            box-shadow: 0px 0px 10px rgba(255, 152, 0, 0.5);
+        }
+
+        .btn-delete {
+            border-color: #f44336;
+            color: #f44336;
+        }
+        .btn-delete:hover {
+            background: #f44336;
+            color: white;
+            box-shadow: 0px 0px 10px rgba(244, 67, 54, 0.5);
+        }
+
+        /* 🟢 Animation globale */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
 {% endblock %}

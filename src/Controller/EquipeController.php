@@ -141,13 +141,22 @@ final class EquipeController extends AbstractController
     public function delete(Request $request, Equipe $equipe, EntityManagerInterface $entityManager): Response
     {
         if ($this->isCsrfTokenValid('delete' . $equipe->getId(), $request->request->get('_token'))) {
+            // 🔥 Supprimer toutes les affectations liées à cette équipe
+            foreach ($equipe->getAffectations() as $affectation) {
+                $entityManager->remove($affectation);
+            }
+    
+            // 🔥 Supprimer les relations des utilisateurs avec l'équipe
             foreach ($equipe->getEquipeUsers() as $equipeUser) {
                 $entityManager->remove($equipeUser);
             }
+    
+            // 🔥 Maintenant, on peut supprimer l'équipe
             $entityManager->remove($equipe);
             $entityManager->flush();
         }
-
+    
         return $this->redirectToRoute('app_equipe_index');
     }
+    
 }
