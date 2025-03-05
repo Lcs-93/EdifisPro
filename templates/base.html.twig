@@ -17,38 +17,20 @@
 </head>
 <body>
 
-    <!-- Barre de navigation -->
+    <!-- Afficher la navbar uniquement si l'utilisateur est connecté -->
+    {% if app.user %}
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <div class="container">
-            <a class="navbar-brand" href="{{ path('app_chantier_index') }}">Mon Application</a>
+            <!-- Vérifie si l'utilisateur est un admin pour rediriger vers la bonne page -->
+            <a class="navbar-brand" href="{% if is_granted('ROLE_ADMIN') %}{{ path('app_chantier_index') }}{% else %}{{ path('user_dashboard') }}{% endif %}">
+                Mon Application
+            </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
+            
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
-                    {% if app.user is null %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ path('app_login') }}">Connexion</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ path('app_register') }}">Inscription</a>
-                        </li>
-                    {% else %}
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                                Compte
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li>
-                                    <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#editProfileModal">
-                                        Modifier mon profil
-                                    </button>
-                                </li>
-                                <li><a class="dropdown-item" href="{{ path('app_logout') }}">Déconnexion</a></li>
-                            </ul>
-                        </li>
-                    {% endif %}
-
                     {% if is_granted('ROLE_ADMIN') %}
                         <li class="nav-item">
                             <a class="nav-link" href="{{ path('app_chantier_new') }}">Créer un chantier</a>
@@ -61,9 +43,27 @@
                         </li>
                     {% endif %}
                 </ul>
+
+                <!-- Menu "Compte" placé en dernier -->
+                <ul class="navbar-nav ms-auto"> <!-- ms-auto pousse ce menu à la fin -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            Compte
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#editProfileModal">
+                                    Modifier mon profil
+                                </button>
+                            </li>
+                            <li><a class="dropdown-item" href="{{ path('app_logout') }}">Déconnexion</a></li>
+                        </ul>
+                    </li>
+                </ul>
             </div>
         </div>
     </nav>
+    {% endif %}
 
     <!-- Contenu principal -->
     <main class="container my-4">
