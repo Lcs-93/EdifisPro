@@ -1,4 +1,10 @@
-<form method="post" action="{{ path('app_user_delete', {'id': user.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?');">
-    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ user.id) }}">
-    <button class="btn">Delete</button>
-</form>
+<td>
+    {# 🔥 N'afficher le bouton "Supprimer" que si ce n'est pas le compte connecté #}
+    {% if app.user.id != user.id %}
+        <form method="post" action="{{ path('app_user_delete', {'id': user.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?');">
+            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ user.id) }}">
+            <button class="btn">Delete</button>
+        </form>
+    {% endif %}
+</td>
+

@@ -8,6 +8,7 @@ use App\Form\UserType;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -124,8 +125,16 @@ final class UserController extends AbstractController
     }
 
     #[Route('/{id}', name: 'app_user_delete', methods: ['POST'])]
-    public function delete(Request $request, User $user, EntityManagerInterface $entityManager): Response
+    public function delete(Request $request, User $user, EntityManagerInterface $entityManager, Security $security): Response
     {
+	    $currentUser = $security->getUser();
+
+	    // 🔥 Vérifier si l'utilisateur essaie de supprimer son propre compte
+	    if ($currentUser && $currentUser->getId() === $user->getId()) {
+		    $this->addFlash('danger', 'Vous ne pouvez pas supprimer votre propre compte.');
+		    return $this->redirectToRoute('app_user_list');
+	    }
+
         if ($this->isCsrfTokenValid('delete'.$user->getId(), $request->getPayload()->getString('_token'))) {
 	        foreach ($user->getCompetenceUsers() as $competenceUser) {
 		        $entityManager->remove($competenceUser);
