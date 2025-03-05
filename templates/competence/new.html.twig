@@ -1,0 +1,21 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h1>Ajouter une nouvelle compétence</h1>
+
+    <!-- Affichage des messages d'erreur -->
+    {% for message in app.flashes('error') %}
+        <div class="alert alert-danger">
+            {{ message }}
+        </div>
+    {% endfor %}
+
+    <!-- Formulaire de création de compétence -->
+    {{ form_start(form) }}
+        {{ form_row(form.nomCompetence) }}
+        <button type="submit" class="btn btn-success">Créer</button>
+    {{ form_end(form) }}
+
+    <a href="{{ path('app_competence_index') }}" class="btn btn-secondary">Retour à la liste</a>
+{% endblock %}
+
