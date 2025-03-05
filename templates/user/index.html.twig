@@ -5,12 +5,24 @@
 {% block body %}
 <h1>Bienvenue sur votre espace</h1>
 
-<p>Voici les informations sur votre chantier actuel :</p>
+<p>Voici vos informations :</p>
 
 <ul>
-    <li>Lieu : Nom du chantier</li>
-    <li>Date de début : XX/XX/XXXX</li>
-    <li>Date de fin : XX/XX/XXXX</li>
+    <li>Nom : {{ app.user.nom }}</li>
+    <li>Prénom : {{ app.user.prenom }}</li>
+    <li>Compétences :
+        {% if app.user.competenceUsers() is not empty %}
+            {% for competence in app.user.competenceUsers() %}
+                <ul>
+                    {{ competence.getCompetence().nomCompetence }}
+                </ul>
+            {% endfor %}
+        {% else %}
+        <em>Aucune compétence</em>
+    {% endif %}
+
+
+    </li>
 </ul>
 
 <a href="{{ path('app_logout') }}">Déconnexion</a>
