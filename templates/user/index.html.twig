@@ -18,12 +18,12 @@
                 </ul>
             {% endfor %}
         {% else %}
-        <em>Aucune compétence</em>
+        <em>Vous n'avez pas encore de compétence attribuée.</em>
     {% endif %}
 
 
     </li>
 </ul>
 
-<a href="{{ path('app_logout') }}">Déconnection</a>
+<a href="{{ path('app_logout') }}">Déconnexion</a>
 {% endblock %}

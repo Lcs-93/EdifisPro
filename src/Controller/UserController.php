@@ -162,7 +162,7 @@ final class UserController extends AbstractController
 		$user = $this->getUser();
 
 		if (!$user instanceof User) {
-			return new Response("Utilisateur non connecté", Response::HTTP_UNAUTHORIZED);
+			return new Response("Utilisateur non connecté.", Response::HTTP_UNAUTHORIZED);
 		}
 
 		// Création du formulaire
@@ -180,7 +180,7 @@ final class UserController extends AbstractController
 			$entityManager->persist($user);
 			$entityManager->flush();
 
-			return new Response("Profil mis à jour avec succès", Response::HTTP_OK);
+			return new Response("Profil mis à jour avec succès.", Response::HTTP_OK);
 		}
 
 		return $this->render('user/edit_modal.html.twig', [

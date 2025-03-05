@@ -41,7 +41,7 @@ class CompetenceController extends AbstractController
             $em->persist($competence);
             $em->flush();
 
-            $this->addFlash('success', 'Compétence ajoutée avec succès');
+            $this->addFlash('success', 'Compétence ajoutée avec succès.');
 
             return $this->redirectToRoute('app_competence_index'); // Redirection vers la liste des compétences
         }
@@ -100,7 +100,7 @@ class CompetenceController extends AbstractController
     
             $em->flush();
     
-            $this->addFlash('success', 'Compétence mise à jour avec succès');
+            $this->addFlash('success', 'Compétence mise à jour avec succès.');
     
             return $this->redirectToRoute('app_competence_index'); // Redirection vers la liste des compétences
         }
@@ -118,7 +118,7 @@ class CompetenceController extends AbstractController
         if ($this->isCsrfTokenValid('delete' . $competence->getId(), $request->request->get('_token'))) {
             $em->remove($competence);
             $em->flush();
-            $this->addFlash('success', 'Compétence supprimée avec succès');
+            $this->addFlash('success', 'Compétence supprimée avec succès.');
         }
 
         return $this->redirectToRoute('app_competence_index');
