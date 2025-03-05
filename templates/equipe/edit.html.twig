@@ -1,0 +1,86 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div class="container mt-5">
+        <div class="card shadow-lg p-4">
+            <h1 class="text-center text-primary mb-4">Modifier l'Équipe</h1>
+
+            {{ form_start(form) }}
+
+            <div class="mb-3">
+                {{ form_label(form.nomEquipe) }}
+                {{ form_widget(form.nomEquipe, {'attr': {'class': 'form-control'}}) }}
+            </div>
+
+    <div class="row">
+    <div class="col-md-6 mb-3">
+        {{ form_label(form.dateDebut, 'Date de Début') }}
+        {{ form_widget(form.dateDebut, {'attr': {'class': 'form-control'}}) }}
+        {{ form_errors(form.dateDebut) }} {# Affiche les erreurs de validation #}
+    </div>
+    <div class="col-md-6 mb-3">
+        {{ form_label(form.dateFin, 'Date de Fin') }}
+        {{ form_widget(form.dateFin, {'attr': {'class': 'form-control'}}) }}
+        {{ form_errors(form.dateFin) }} {# Affiche les erreurs de validation #}
+    </div>
+</div>
+
+
+            <h3 class="mt-4 text-secondary">Membres de l'équipe</h3>
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Membres actuels</h5>
+                    <div class="card p-3">
+                        {% for membre in form.membres %}
+                            {% if membre.vars.data in currentMembers %}
+                                <div class="form-check">
+                                    {{ form_widget(membre, {'attr': {'class': 'form-check-input', 'checked': 'checked'}}) }}
+                                    {{ form_label(membre, null, {'label_attr': {'class': 'form-check-label'}}) }}
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <h5>Utilisateurs disponibles</h5>
+                    <div class="card p-3">
+                        {% for membre in form.membres %}
+                            {% if membre.vars.data not in currentMembers %}
+                                <div class="form-check">
+                                    {{ form_widget(membre, {'attr': {'class': 'form-check-input'}}) }}
+                                    {{ form_label(membre, null, {'label_attr': {'class': 'form-check-label'}}) }}
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-success btn-lg mt-3">
+                <i class="fas fa-save"></i> Mettre à jour
+            </button>
+
+            {{ form_end(form) }}
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const form = document.querySelector("form");
+        const dateDebutInput = document.querySelector("#equipe_dateDebut");
+        const dateFinInput = document.querySelector("#equipe_dateFin");
+
+        form.addEventListener("submit", function(event) {
+            let dateDebut = new Date(dateDebutInput.value);
+            let dateFin = new Date(dateFinInput.value);
+
+            if (dateFin <= dateDebut) {
+                event.preventDefault();
+                alert("La date de fin doit être postérieure à la date de début !");
+            }
+        });
+    });
+</script>
+
+{% endblock %}
