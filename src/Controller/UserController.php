@@ -135,8 +135,8 @@ final class UserController extends AbstractController
 	{
 		$currentUser = $security->getUser();
 
-		// 🔥 Vérifier si l'utilisateur essaie de supprimer son propre compte
-		if ($currentUser && $currentUser->getId() === $user->getId()) {
+		// Vérifier si l'utilisateur est authentifié et s'il essaie de supprimer son propre compte
+		if ($currentUser instanceof User && $currentUser->getId() === $user->getId()) {
 			$this->addFlash('danger', 'Vous ne pouvez pas supprimer votre propre compte.');
 			return $this->redirectToRoute('app_user_list');
 		}
