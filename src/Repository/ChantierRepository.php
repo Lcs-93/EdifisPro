@@ -30,7 +30,16 @@ class ChantierRepository extends ServiceEntityRepository
     //            ->getResult()
     //        ;
     //    }
-
+    public function findByCompetence($competenceId)
+    {
+        return $this->createQueryBuilder('c')
+            ->join('c.competenceChantiers', 'cc')  // Relation ManyToOne vers CompetenceChantier
+            ->join('cc.competence', 'comp') // Relation ManyToOne vers Competence
+            ->where('comp.id = :competenceId')
+            ->setParameter('competenceId', $competenceId)
+            ->getQuery()
+            ->getResult();
+    }
     //    public function findOneBySomeField($value): ?Chantier
     //    {
     //        return $this->createQueryBuilder('c')

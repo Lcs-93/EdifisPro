@@ -22,6 +22,13 @@
                 </div>
             </div>
 
+            <!-- Affichage des messages Flash pour les erreurs -->
+            {% for message in app.flashes('danger') %}
+                <div class="alert alert-danger">
+                    {{ message }}
+                </div>
+            {% endfor %}
+
             <!-- 🏆 Tableau des Équipes -->
             <div class="table-responsive">
                 <table class="table custom-table" id="teamTable">
@@ -128,9 +135,11 @@
             border-bottom: 3px solid white;
             text-align: center;
         }
-.custom-table {
-    border-radius: 10px;
-}
+
+        .custom-table {
+            border-radius: 10px;
+        }
+
         /* 🟢 Material UI Table Design */
         .custom-table {
             border-collapse: separate;
@@ -171,6 +180,7 @@
             border-color: #2196f3;
             color: #2196f3;
         }
+
         .btn-view:hover {
             background: #2196f3;
             color: white;
@@ -181,6 +191,7 @@
             border-color: #ff9800;
             color: #ff9800;
         }
+
         .btn-edit:hover {
             background: #ff9800;
             color: white;
@@ -191,6 +202,7 @@
             border-color: #f44336;
             color: #f44336;
         }
+
         .btn-delete:hover {
             background: #f44336;
             color: white;

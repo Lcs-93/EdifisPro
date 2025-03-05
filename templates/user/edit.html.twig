@@ -28,28 +28,36 @@
                 {{ form_widget(form.email, {'attr': {'class': 'form-control custom-input', 'placeholder': 'Entrez l\'email'}}) }}
                 {{ form_errors(form.email) }}
             </div>
+
             <div class="mb-4">
-    <label class="form-label fw-bold"><i class="fas fa-lock"></i> Mot de passe</label>
-    <div class="input-group">
-        {{ form_widget(form.plainPassword, {'attr': {'class': 'form-control custom-input', 'type': 'password', 'placeholder': 'Entrez le mot de passe', 'id': 'passwordField', 'oninput': 'validatePassword()'}}) }}
-        <button class="btn btn-outline-secondary toggle-password" type="button" onclick="togglePassword()">
-            <i class="fas fa-eye" id="toggleIcon"></i>
-        </button>
-    </div>
-    <div class="password-strength mt-2">
-        <div id="passwordStrengthBar" class="progress">
-            <div id="passwordStrength" class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
-        </div>
-        <small id="passwordMessage" class="text-muted"></small>
-    </div>
-    {{ form_errors(form.plainPassword) }}
-</div>
+                <label class="form-label fw-bold"><i class="fas fa-lock"></i> Mot de passe</label>
+                <div class="input-group">
+                    {{ form_widget(form.plainPassword, {'attr': {'class': 'form-control custom-input', 'type': 'password', 'placeholder': 'Entrez le mot de passe', 'id': 'passwordField', 'oninput': 'validatePassword()'}}) }}
+                    <button class="btn btn-outline-secondary toggle-password" type="button" onclick="togglePassword()">
+                        <i class="fas fa-eye" id="toggleIcon"></i>
+                    </button>
+                </div>
+                <div class="password-strength mt-2">
+                    <div id="passwordStrengthBar" class="progress">
+                        <div id="passwordStrength" class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                    <small id="passwordMessage" class="text-muted"></small>
+                </div>
+                {{ form_errors(form.plainPassword) }}
+            </div>
 
             <div class="mb-4">
                 <label class="form-label fw-bold"><i class="fas fa-user-tag"></i> Rôle</label>
                 {{ form_widget(form.roles, {'attr': {'class': 'form-select custom-select'}}) }}
                 {{ form_errors(form.roles) }}
             </div>
+
+            {# Message d'avertissement si l'utilisateur est assigné à une équipe #}
+            {% if isAssignedToEquipe %}
+                <div class="alert alert-warning text-center">
+                    <i class="fas fa-exclamation-triangle"></i> Cet utilisateur est déjà assigné à une équipe. Les compétences ne peuvent pas être modifiées.
+                </div>
+            {% endif %}
 
             <div class="mb-4">
                 <label class="form-label fw-bold"><i class="fas fa-cogs"></i> Compétences</label>

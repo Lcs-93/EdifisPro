@@ -9,6 +9,13 @@
                 <h2>👤 Créer un Utilisateur</h2>
             </div>
 
+            <!-- Affichage des messages flash -->
+            {% for message in app.flashes('danger') %}
+                <div class="alert alert-danger">
+                    {{ message }}
+                </div>
+            {% endfor %}
+
             <!-- Formulaire -->
             {{ form_start(form) }}
 
@@ -30,23 +37,22 @@
                 {{ form_errors(form.email) }}
             </div>
 
-<div class="mb-4">
-    <label class="form-label fw-bold"><i class="fas fa-lock"></i> Mot de passe</label>
-    <div class="input-group">
-        {{ form_widget(form.plainPassword, {'attr': {'class': 'form-control custom-input', 'type': 'password', 'placeholder': 'Entrez le mot de passe', 'id': 'passwordField', 'oninput': 'validatePassword()'}}) }}
-        <button class="btn btn-outline-secondary toggle-password" type="button" onclick="togglePassword()">
-            <i class="fas fa-eye" id="toggleIcon"></i>
-        </button>
-    </div>
-    <div class="password-strength mt-2">
-        <div id="passwordStrengthBar" class="progress">
-            <div id="passwordStrength" class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
-        </div>
-        <small id="passwordMessage" class="text-muted"></small>
-    </div>
-    {{ form_errors(form.plainPassword) }}
-</div>
-
+            <div class="mb-4">
+                <label class="form-label fw-bold"><i class="fas fa-lock"></i> Mot de passe</label>
+                <div class="input-group">
+                    {{ form_widget(form.plainPassword, {'attr': {'class': 'form-control custom-input', 'type': 'password', 'placeholder': 'Entrez le mot de passe', 'id': 'passwordField', 'oninput': 'validatePassword()'}}) }}
+                    <button class="btn btn-outline-secondary toggle-password" type="button" onclick="togglePassword()">
+                        <i class="fas fa-eye" id="toggleIcon"></i>
+                    </button>
+                </div>
+                <div class="password-strength mt-2">
+                    <div id="passwordStrengthBar" class="progress">
+                        <div id="passwordStrength" class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                    <small id="passwordMessage" class="text-muted"></small>
+                </div>
+                {{ form_errors(form.plainPassword) }}
+            </div>
 
             <div class="mb-4">
                 <label class="form-label fw-bold"><i class="fas fa-user-tag"></i> Rôle</label>
@@ -83,9 +89,8 @@
         </div>
     </div>
 
-
     <style>
-       
+        /* Styles */
         .glassmorphism-card {
             background: rgba(255, 255, 255, 0.2);
             backdrop-filter: blur(15px);
@@ -106,7 +111,6 @@
         }
 
         .custom-input, .custom-select {
-       
             border-radius: 12px;
             padding: 14px;
             font-size: 16px;
@@ -160,16 +164,16 @@
         .toggle-password:hover {
             background: rgba(255, 255, 255, 0.9);
         }
-.progress {
-    height: 8px;
-    border-radius: 5px;
-    overflow: hidden;
-}
 
-.progress-bar {
-    transition: width 0.3s ease-in-out;
-}
+        .progress {
+            height: 8px;
+            border-radius: 5px;
+            overflow: hidden;
+        }
 
+        .progress-bar {
+            transition: width 0.3s ease-in-out;
+        }
     </style>
 
     <script>
@@ -188,51 +192,36 @@
             }
         }
 
-          function validatePassword() {
-        let password = document.getElementById("passwordField").value;
-        let strengthBar = document.getElementById("passwordStrength");
-        let message = document.getElementById("passwordMessage");
+        function validatePassword() {
+            let password = document.getElementById("passwordField").value;
+            let strengthBar = document.getElementById("passwordStrength");
+            let message = document.getElementById("passwordMessage");
 
-        let strength = 0;
-        if (password.length >= 12) strength += 25;
-        if (/[A-Z]/.test(password)) strength += 25;
-        if (/\d/.test(password)) strength += 25;
-        if (/[\W_]/.test(password)) strength += 25;
+            let strength = 0;
+            if (password.length >= 12) strength += 25;
+            if (/[A-Z]/.test(password)) strength += 25;
+            if (/\d/.test(password)) strength += 25;
+            if (/[\W_]/.test(password)) strength += 25;
 
-        strengthBar.style.width = strength + "%";
+            strengthBar.style.width = strength + "%";
 
-        if (strength === 0) {
-            strengthBar.classList.remove("bg-success", "bg-warning", "bg-danger");
-            strengthBar.classList.add("bg-light");
-            message.innerHTML = "Mot de passe faible";
-        } else if (strength < 50) {
-            strengthBar.classList.remove("bg-success", "bg-light");
-            strengthBar.classList.add("bg-danger");
-            message.innerHTML = "Ajoutez une majuscule, un chiffre et un caractère spécial.";
-        } else if (strength < 100) {
-            strengthBar.classList.remove("bg-danger", "bg-light");
-            strengthBar.classList.add("bg-warning");
-            message.innerHTML = "Mot de passe acceptable, mais peut être renforcé.";
-        } else {
-            strengthBar.classList.remove("bg-danger", "bg-warning", "bg-light");
-            strengthBar.classList.add("bg-success");
-            message.innerHTML = "Mot de passe sécurisé ! ✅";
+            if (strength === 0) {
+                strengthBar.classList.remove("bg-success", "bg-warning", "bg-danger");
+                strengthBar.classList.add("bg-light");
+                message.innerHTML = "Mot de passe faible";
+            } else if (strength < 50) {
+                strengthBar.classList.remove("bg-success", "bg-light");
+                strengthBar.classList.add("bg-danger");
+                message.innerHTML = "Ajoutez une majuscule, un chiffre et un caractère spécial.";
+            } else if (strength < 100) {
+                strengthBar.classList.remove("bg-danger", "bg-light");
+                strengthBar.classList.add("bg-warning");
+                message.innerHTML = "Mot de passe acceptable, mais peut être renforcé.";
+            } else {
+                strengthBar.classList.remove("bg-danger", "bg-warning", "bg-light");
+                strengthBar.classList.add("bg-success");
+                message.innerHTML = "Mot de passe sécurisé ! ✅";
+            }
         }
-    }
-
-    function togglePassword() {
-        let passwordField = document.getElementById("passwordField");
-        let toggleIcon = document.getElementById("toggleIcon");
-
-        if (passwordField.type === "password") {
-            passwordField.type = "text";
-            toggleIcon.classList.remove("fa-eye");
-            toggleIcon.classList.add("fa-eye-slash");
-        } else {
-            passwordField.type = "password";
-            toggleIcon.classList.remove("fa-eye-slash");
-            toggleIcon.classList.add("fa-eye");
-        }
-    }
     </script>
 {% endblock %}
