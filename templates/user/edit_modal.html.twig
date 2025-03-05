@@ -1,0 +1,43 @@
+<!-- Formulaire de modification du profil -->
+<div class="container p-4">
+    <div class="text-center">
+        <!-- Avatar utilisateur -->
+        <img src="https://via.placeholder.com/100" alt="Avatar" class="rounded-circle img-thumbnail">
+        <div class="mt-2">
+            <button class="btn btn-outline-primary btn-sm"><i class="fas fa-image"></i> Changer</button>
+            <button class="btn btn-outline-danger btn-sm"><i class="fas fa-trash"></i> Supprimer</button>
+        </div>
+    </div>
+
+    <hr>
+
+    <form id="editProfileForm" method="post" action="{{ path('user_edit_modal') }}">
+        <!-- Champs Nom et Prénom -->
+        <div class="row">
+            <div class="col-md-6">
+                {{ form_row(form.nom, {'attr': {'class': 'form-control'}}) }}
+            </div>
+            <div class="col-md-6">
+                {{ form_row(form.prenom, {'attr': {'class': 'form-control'}}) }}
+            </div>
+        </div>
+
+        <hr>
+ 
+            
+        
+
+        <div class="row">
+            <div class="col-md-6">
+                {{ form_row(form.plainPassword, {'attr': {'class': 'form-control', 'type': 'password'}}) }}
+            </div>
+        </div>
+
+        {{ form_end(form) }}
+    </form>
+
+    <!-- Message de confirmation -->
+    <div id="profileUpdateSuccess" class="alert alert-success text-center mt-3 d-none" role="alert">
+        <i class="fas fa-check-circle"></i> Profil mis à jour avec succès !
+    </div>
+</div>
