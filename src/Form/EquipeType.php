@@ -39,7 +39,12 @@ class EquipeType extends AbstractType
                 'required' => false,
                 'label' => 'Chef d\'équipe',
                 'placeholder' => 'Sélectionner un chef d\'équipe',
-                'attr' => ['class' => 'form-select']
+                'attr' => ['class' => 'form-select'],
+                'query_builder' => function (EntityRepository $er) {
+                    return $er->createQueryBuilder('u')
+                        ->where('u.roles NOT LIKE :role')  // Exclure les administrateurs
+                        ->setParameter('role', '%ROLE_ADMIN%');
+                },
             ])
             ->add('membres', EntityType::class, [
                 'class' => User::class,
