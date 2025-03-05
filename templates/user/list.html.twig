@@ -27,8 +27,17 @@
                 <td>{{ user.email }}</td>
                 <td>{{ user.password }}</td>
                 <td>{% for role in user.roles %}
-                        {{ role }}
+                        <li>{{ role }}</li>
                     {% endfor %}</td>
+                <td>
+                    {% if user.competenceUsers() is not empty %}
+                            {% for competence in user.competenceUsers() %}
+                                <li>{{ competence.getCompetence().nomCompetence }}</li>
+                            {% endfor %}
+                    {% else %}
+                        <em>Aucune compétence</em>
+                    {% endif %}
+                </td>
                 <td>
                     <a href="{{ path('app_user_show', {'id': user.id}) }}">afficher</a>
                     <a href="{{ path('app_user_edit', {'id': user.id}) }}">modifier</a>

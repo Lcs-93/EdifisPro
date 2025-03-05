@@ -1,5 +1,6 @@
 {% extends 'base.html.twig' %}
 
+
 {% block title %}User{% endblock %}
 
 {% block body %}
@@ -34,12 +35,25 @@
                     {% endfor %}</td>
                 <td>
             </tr>
+            <tr>
+                <th>Compétences</th>
+                <td>
+                    {% if user.competenceUsers() is not empty %}
+                        {% for competence in user.competenceUsers() %}
+                            <li >{{ competence.getCompetence().nomCompetence }}</li>
+                        {% endfor %}
+                    {% else %}
+                        <em>Aucune compétence</em>
+                    {% endif %}
+                </td>
+            </tr>
+
         </tbody>
     </table>
 
-    <a href="{{ path('app_user_list') }}">back to list</a>
+    <a href="{{ path('app_user_list') }}">Retourner à la liste</a>
 
-    <a href="{{ path('app_user_edit', {'id': user.id}) }}">edit</a>
+    <a href="{{ path('app_user_edit', {'id': user.id}) }}">Modifier</a>
 
     {{ include('user/_delete_form.html.twig') }}
 {% endblock %}
