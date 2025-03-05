@@ -46,8 +46,8 @@ class UserEditFormType extends AbstractType
                 'attr' => ['class' => 'form-control', 'placeholder' => 'Laisser vide si inchangé'],
                 'constraints' => [
                     new Length([
-                        'min' => 6,
-                        'minMessage' => 'Le mot de passe doit contenir au moins 6 caractères',
+                        'min' => 12,
+                        'minMessage' => 'Le mot de passe doit contenir au moins 12 caractères',
                     ]),
                 ],
             ])
