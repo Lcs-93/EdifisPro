@@ -131,26 +131,55 @@ final class UserController extends AbstractController
 	}
 
 	#[Route('/{id}', name: 'app_user_delete', methods: ['POST'])]
-	public function delete(Request $request, User $user, EntityManagerInterface $entityManager, Security $security): Response
-	{
-		$currentUser = $security->getUser();
+public function delete(Request $request, User $user, EntityManagerInterface $entityManager, Security $security): Response
+{
+    $currentUser = $security->getUser();
 
-		// Vérifier si l'utilisateur est authentifié et s'il essaie de supprimer son propre compte
-		if ($currentUser instanceof User && $currentUser->getId() === $user->getId()) {
-			$this->addFlash('danger', 'Vous ne pouvez pas supprimer votre propre compte.');
-			return $this->redirectToRoute('app_user_list');
-		}
+    // Vérifier si l'utilisateur est authentifié et s'il essaie de supprimer son propre compte
+    if ($currentUser instanceof User && $currentUser->getId() === $user->getId()) {
+        $this->addFlash('danger', 'Vous ne pouvez pas supprimer votre propre compte.');
+        return $this->redirectToRoute('app_user_list');
+    }
 
-		if ($this->isCsrfTokenValid('delete'.$user->getId(), $request->getPayload()->getString('_token'))) {
-			foreach ($user->getCompetenceUsers() as $competenceUser) {
-				$entityManager->remove($competenceUser);
-			}
-			$entityManager->remove($user);
-			$entityManager->flush();
-		}
+    // Vérifier si l'utilisateur essaie de supprimer un administrateur
+    if (in_array('ROLE_ADMIN', $user->getRoles())) {
+        $this->addFlash('danger', 'Vous ne pouvez pas supprimer un administrateur.');
+        return $this->redirectToRoute('app_user_list');
+    }
 
-		return $this->redirectToRoute('app_user_list', [], Response::HTTP_SEE_OTHER);
-	}
+    // Vérifier le CSRF token
+    if ($this->isCsrfTokenValid('delete'.$user->getId(), $request->get('_token'))) {
+        // Supprimer les relations dans la table `competence_user`
+        foreach ($user->getCompetenceUsers() as $competenceUser) {
+            $entityManager->remove($competenceUser);
+        }
+
+        // Supprimer les relations dans la table `equipe_user` (liens entre utilisateur et équipe)
+        foreach ($user->getEquipeUsers() as $equipeUser) {
+            $entityManager->remove($equipeUser);
+        }
+
+        // Vérifier si l'utilisateur est chef d'équipe, et réassigner le chef ou supprimer l'équipe si nécessaire
+        foreach ($user->getEquipes() as $equipe) {
+            if ($equipe->getChefEquipe() === $user) {
+                // Si l'utilisateur est le chef d'équipe, vous pouvez soit réattribuer le chef d'équipe,
+                // soit supprimer l'équipe, selon vos besoins.
+                
+                // Exemple : Réattribuer le chef d'équipe à NULL ou à un autre utilisateur
+                $equipe->setChefEquipe(null);
+                
+                // Si vous voulez supprimer l'équipe si l'utilisateur est chef :
+                // $entityManager->remove($equipe);
+            }
+        }
+
+        // Supprimer l'utilisateur
+        $entityManager->remove($user);
+        $entityManager->flush();
+    }
+
+    return $this->redirectToRoute('app_user_list', [], Response::HTTP_SEE_OTHER);
+}
 
 
 	#[Route('/user/edit-modal', name: 'user_edit_modal')]
