@@ -42,16 +42,25 @@
                 </table>
             </div>
 
-            <div class="text-center mt-4">
-                <a href="{{ path('app_chantier_index') }}" class="btn btn-outline-secondary btn-glass">
-                    <i class="fas fa-arrow-left"></i> Retour
-                </a>
-                <a href="{{ path('app_chantier_edit', {'id': chantier.id}) }}" class="btn btn-warning btn-glass">
-                    <i class="fas fa-edit"></i> Modifier
-                </a>
-                {{ include('chantier/_delete_form.html.twig') }}
-            </div>
-        </div>
+      <div class="text-center mt-4 d-flex justify-content-center gap-3">
+    <a href="{{ path('app_chantier_index') }}" class="btn btn-outline-secondary btn-lg">
+        <i class="fas fa-arrow-left"></i> Retour
+    </a>
+
+    <a href="{{ path('app_chantier_edit', {'id': chantier.id}) }}" class="btn btn-warning btn-lg">
+        <i class="fas fa-edit"></i> Modifier
+    </a>
+
+    {% if chantier is defined and chantier.id is not null %}
+        <form action="{{ path('app_chantier_delete', {'id': chantier.id}) }}" method="POST" onsubmit="return confirm('Voulez-vous vraiment supprimer ce chantier ?');">
+            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ chantier.id) }}">
+            <button class="btn btn-danger btn-lg btn-delete">
+                <i class="fas fa-trash"></i> Supprimer
+            </button>
+        </form>
+    {% endif %}
+</div>
+
     </div>
 
   
@@ -124,6 +133,46 @@
             background: linear-gradient(45deg, #0056b3, #0096c7);
             box-shadow: 0px 6px 20px rgba(0, 123, 255, 0.6);
         }
+.d-flex.gap-3 {
+    gap: 15px;
+}
+
+.btn-outline-secondary {
+    border-radius: 30px;
+    padding: 12px 20px;
+    transition: all 0.3s ease-in-out;
+}
+
+.btn-outline-secondary:hover {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-warning {
+    border-radius: 30px;
+    padding: 12px 20px;
+    font-weight: bold;
+    transition: all 0.3s ease-in-out;
+}
+
+.btn-warning:hover {
+    background: #e0a800;
+}
+
+.btn-delete {
+    border-radius: 30px;
+    padding: 12px 20px;
+    font-weight: bold;
+    transition: all 0.3s ease-in-out;
+    background: linear-gradient(45deg, #dc3545, #ff0000);
+    border: none;
+    box-shadow: 0px 4px 15px rgba(220, 53, 69, 0.4);
+}
+
+.btn-delete:hover {
+    background: linear-gradient(45deg, #b71c1c, #ff4c4c);
+    box-shadow: 0px 6px 20px rgba(220, 53, 69, 0.6);
+}
 
  
         @keyframes fadeIn {

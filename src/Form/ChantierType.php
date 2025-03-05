@@ -41,7 +41,7 @@ class ChantierType extends AbstractType
                 'choice_label' => 'nomEquipe',
                 'multiple' => true,
                 'expanded' => true, 
-                'mapped' => false, // On gère l'affectation nous-mêmes
+                'mapped' => false, 
                 'required' => false,
             ]);
             
