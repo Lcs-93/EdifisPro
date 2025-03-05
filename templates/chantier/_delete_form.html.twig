@@ -1,4 +1,6 @@
-<form method="post" action="{{ path('app_chantier_delete', {'id': chantier.id}) }}" onsubmit="return confirm('Are you sure you want to delete this item?');">
-    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ chantier.id) }}">
-    <button class="btn">Delete</button>
-</form>
+{% if chantier is defined and chantier.id is not null %}
+    <form method="post" action="{{ path('app_chantier_delete', {'id': chantier.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce chantier ?');">
+        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ chantier.id) }}">
+        <button class="btn btn-danger">Supprimer</button>
+    </form>
+{% endif %}

@@ -5,6 +5,11 @@ namespace App\Entity;
 use App\Repository\EquipeRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Types\Types;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Mapping\ClassMetadata;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
+
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: EquipeRepository::class)]
@@ -32,6 +37,52 @@ class Equipe
      */
     #[ORM\OneToMany(targetEntity: Affectation::class, mappedBy: 'equipe')]
     private Collection $affectations;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[Assert\NotNull(message: 'La date de début est obligatoire.')]
+    private ?\DateTimeInterface $dateDebut = null;
+    
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[Assert\NotNull(message: 'La date de fin est obligatoire.')]
+    private ?\DateTimeInterface $dateFin = null;
+    
+    public function getDateDebut(): ?\DateTimeInterface
+    {
+        return $this->dateDebut;
+    }
+    
+    public function setDateDebut(\DateTimeInterface $dateDebut): static
+    {
+        $this->dateDebut = $dateDebut;
+        return $this;
+    }
+    
+    public function getDateFin(): ?\DateTimeInterface
+    {
+        return $this->dateFin;
+    }
+    
+    public function setDateFin(\DateTimeInterface $dateFin): static
+    {
+        $this->dateFin = $dateFin;
+        return $this;
+    }
+    public static function loadValidatorMetadata(ClassMetadata $metadata)
+{
+    $metadata->addConstraint(new Assert\Callback('validateDates'));
+}
+
+public function validateDates(ExecutionContextInterface $context)
+{
+    if ($this->dateDebut && $this->dateFin) {
+        if ($this->dateFin <= $this->dateDebut) {
+            $context->buildViolation('La date de fin doit être postérieure à la date de début.')
+                ->atPath('dateFin')
+                ->addViolation();
+        }
+    }
+}
+
 
     public function __construct()
     {
@@ -67,6 +118,7 @@ class Equipe
 
         return $this;
     }
+    
 
     /**
      * @return Collection<int, EquipeUser>

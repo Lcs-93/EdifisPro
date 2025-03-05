@@ -44,11 +44,30 @@
                 </div>
             </div>
 
+            <h3 class="mt-4 text-secondary"><i class="fas fa-users"></i> Équipes Disponibles :</h3>
+            <div class="card p-3">
+                <div class="row">
+                    {% for equipe in form.equipes %}
+                        <div class="col-md-4">
+                            <div class="form-check">
+                                {{ form_widget(equipe, {'attr': {'class': 'form-check-input'}}) }}
+                                {{ form_label(equipe, null, {'label_attr': {'class': 'form-check-label'}}) }}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
             <div class="text-center mt-4">
                 <button type="submit" class="btn btn-success btn-lg">
                     <i class="fas fa-save"></i> Créer le Chantier
                 </button>
             </div>
+{% for message in app.flashes('danger') %}
+    <div class="alert alert-danger">
+        {{ message }}
+    </div>
+{% endfor %}
 
             {{ form_end(form) }}
         </div>

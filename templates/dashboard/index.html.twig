@@ -1,0 +1,194 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Tableau de Bord{% endblock %}
+
+{% block body %}
+    <div class="container mt-5">
+        <h1 class="text-center text-primary mb-4"><i class="fas fa-tachometer-alt"></i> Tableau de Bord</h1>
+
+        <!-- 🟢 Bouton pour afficher/cacher la carte du graphique -->
+        <div class="text-end mb-3">
+            <button id="toggleGraphBtn" class="btn btn-outline-primary">
+                <i class="fas fa-chart-line"></i> Afficher/Masquer Graphique
+            </button>
+        </div>
+
+        <div class="card shadow-lg p-4 mb-4" id="graphCard">
+            <h3 class="text-secondary">Bienvenue, {{ user.nom }} {{ user.prenom }} !</h3>
+            {% if is_admin %}
+                <p class="text-muted">Vous êtes administrateur. Vous voyez tous les chantiers.</p>
+            {% else %}
+                <p class="text-muted">Voici les chantiers auxquels vous êtes affecté.</p>
+            {% endif %}
+
+            <!-- 🟢 Filtres -->
+            <div class="row g-3 mb-3">
+                <div class="col-md-4">
+                    <label for="monthPicker" class="form-label fw-bold">Sélectionnez un mois :</label>
+                    <input type="month" id="monthPicker" class="form-control" value="{{ 'now'|date('Y-m') }}">
+                </div>
+                <div class="col-md-4">
+                    <label for="statusFilter" class="form-label fw-bold">Filtrer par statut :</label>
+                    <select id="statusFilter" class="form-select">
+                        <option value="all">Tous</option>
+                        <option value="en_cours">En cours</option>
+                        <option value="en_pause">En pause</option>
+                        <option value="termine">Terminé</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- 🟢 Graphique des chantiers -->
+            <canvas id="chantierChart"></canvas>
+        </div>
+
+        {% if chantiers is not empty %}
+            <!-- 🟢 Tableau des chantiers -->
+            <div class="table-responsive">
+                <table class="table custom-table">
+                    <thead>
+                        <tr>
+                            <th>Chantier</th>
+                            <th>Statut</th>
+                            <th>Date Début</th>
+                            <th>Date Fin</th>
+                            <th>Équipes Affectées</th>
+                        </tr>
+                    </thead>
+                    <tbody id="chantierTableBody">
+                        {% for chantier in chantiers %}
+                            <tr data-status="{{ chantier.status }}">
+                                <td>{{ chantier.lieu }}</td>
+                                <td>
+                                    <span class="status-badge status-{{ chantier.status }}">
+                                        {{ chantier.status|replace({'en_cours': 'En cours', 'en_pause': 'En pause', 'termine': 'Terminé'}) }}
+                                    </span>
+                                </td>
+                                <td>{{ chantier.dateDebut|date("d/m/Y") }}</td>
+                                <td>{{ chantier.dateFin|date("d/m/Y") }}</td>
+                                <td>
+                                    <ul class="list-unstyled">
+                                        {% for affectation in chantier.affectations %}
+                                            <li>
+                                                <strong>{{ affectation.equipe.nomEquipe }}</strong>
+                                                ({{ affectation.equipe.dateDebut|date("d/m/Y") }} - {{ affectation.equipe.dateFin|date("d/m/Y") }})
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                <!-- Pagination -->
+                <nav>
+                    <ul class="pagination justify-content-center" id="pagination"></ul>
+                </nav>
+            </div>
+        {% else %}
+            <div class="alert alert-warning text-center">
+                <i class="fas fa-exclamation-circle"></i> Aucun chantier trouvé.
+            </div>
+        {% endif %}
+    </div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    let chantierChart;
+    let chantierTableRows = document.querySelectorAll("#chantierTableBody tr");
+    let rowsPerPage = 10;
+    let currentPage = 1;
+
+    const chantierDataRaw = [
+        {% for chantier in chantiers %}
+            {
+                lieu: "{{ chantier.lieu }}",
+                status: "{{ chantier.status }}",
+                startDate: new Date("{{ chantier.dateDebut|date('Y-m-d') }}"),
+                endDate: new Date("{{ chantier.dateFin|date('Y-m-d') }}")
+            },
+        {% endfor %}
+    ];
+
+    function getFilteredData(statusFilter) {
+        return chantierDataRaw.filter(chantier => statusFilter === "all" || chantier.status === statusFilter)
+            .map((chantier, index) => ({
+                label: chantier.lieu,
+                borderColor: getRandomColor(),
+                backgroundColor: "transparent",
+                tension: 0.4,
+                pointRadius: 5,
+                pointBackgroundColor: getRandomColor(),
+                fill: false,
+                data: [{ x: chantier.startDate, y: index + 1 }, { x: chantier.endDate, y: index + 1 }]
+            }));
+    }
+
+    function initializeChart(statusFilter = "all") {
+        const ctx = document.getElementById("chantierChart").getContext("2d");
+        chantierChart = new Chart(ctx, {
+            type: "line",
+            data: { datasets: getFilteredData(statusFilter) },
+            options: {
+                responsive: true,
+                scales: { x: { type: "time", time: { unit: "day" } } },
+                plugins: { legend: { display: true }, zoom: { pan: { enabled: true, mode: "x" }, zoom: { wheel: { enabled: true }, mode: "x" } } }
+            }
+        });
+    }
+
+    function setupPagination() {
+        let numPages = Math.ceil(chantierTableRows.length / rowsPerPage);
+        let pagination = document.getElementById("pagination");
+        pagination.innerHTML = "";
+
+        for (let i = 1; i <= numPages; i++) {
+            let li = document.createElement("li");
+            li.classList.add("page-item");
+            let a = document.createElement("a");
+            a.classList.add("page-link");
+            a.textContent = i;
+            a.href = "#";
+            a.addEventListener("click", function(e) {
+                e.preventDefault();
+                currentPage = i;
+                displayRows();
+            });
+            li.appendChild(a);
+            pagination.appendChild(li);
+        }
+        displayRows();
+    }
+
+    function displayRows() {
+        chantierTableRows.forEach((row, index) => {
+            row.style.display = (index >= (currentPage - 1) * rowsPerPage && index < currentPage * rowsPerPage) ? "" : "none";
+        });
+    }
+
+    document.getElementById("statusFilter").addEventListener("change", function() {
+        let selectedStatus = this.value;
+        chantierChart.data.datasets = getFilteredData(selectedStatus);
+        chantierChart.update();
+    });
+
+    document.getElementById("toggleGraphBtn").addEventListener("click", function() {
+        document.getElementById("graphCard").classList.toggle("d-none");
+    });
+
+    function getRandomColor() {
+        return `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, 1)`;
+    }
+
+    initializeChart();
+    setupPagination();
+});
+</script>
+
+{% endblock %}
