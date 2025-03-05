@@ -1,39 +1,158 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Liste des compétences{% endblock %}
+{% block title %}Gestion des Compétences{% endblock %}
 
 {% block body %}
-    <h1>Liste des compétences</h1>
+    <div class="container mt-5 d-flex justify-content-center">
+        <div class="glassmorphism-card shadow-lg p-5">
+            <div class="glassmorphism-header text-center">
+                <h2>🎓 Gestion des Compétences</h2>
+            </div>
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Nom de la compétence</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for competence in competences %}
-            <tr>
-                <td>{{ competence.id }}</td>
-                <td>{{ competence.nomCompetence }}</td>
-                <td>
-                    <a href="{{ path('app_competence_show', {'id': competence.id}) }}" class="btn btn-info">Voir</a>
-                    <a href="{{ path('app_competence_edit', {'id': competence.id}) }}" class="btn btn-warning">Modifier</a>
-                    <form action="{{ path('app_competence_delete', {'id': competence.id}) }}" method="POST" style="display:inline-block;">
-                        <button class="btn btn-danger" type="submit" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette compétence ?')">Supprimer</button>
-                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ competence.id) }}">
-                    </form>
-                </td>
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="3">Aucune compétence trouvée</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+            <!-- Filtres -->
+            <div class="row mb-4 align-items-center">
+                <div class="col-md-8">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-search"></i></span>
+                        <input type="text" id="searchCompetence" class="form-control search-bar" placeholder="Rechercher une compétence...">
+                    </div>
+                </div>
+                <div class="col-md-4 text-end">
+                    <a href="{{ path('app_competence_new') }}" class="btn btn-glass btn-lg">
+                        <i class="fas fa-plus-circle"></i> Ajouter
+                    </a>
+                </div>
+            </div>
 
-    <a href="{{ path('app_competence_new') }}" class="btn btn-success">Ajouter une compétence</a>
+            <!-- Tableau des Compétences -->
+            <div class="table-responsive">
+                <table class="table custom-table" id="competenceTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th><i class="fas fa-brain"></i> Nom de la compétence</th>
+                            <th><i class="fas fa-tools"></i> Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for competence in competences %}
+                            <tr class="competence-row">
+                                <td><strong>{{ competence.id }}</strong></td>
+                                <td class="competence-name">{{ competence.nomCompetence }}</td>
+                                <td>
+                                    <a href="{{ path('app_competence_show', {'id': competence.id}) }}" class="btn btn-action btn-view" title="Voir">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{{ path('app_competence_edit', {'id': competence.id}) }}" class="btn btn-action btn-edit" title="Modifier">
+                                        <i class="fas fa-pencil-alt"></i>
+                                    </a>
+                                    <form action="{{ path('app_competence_delete', {'id': competence.id}) }}" method="POST" style="display:inline-block;">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ competence.id) }}">
+                                        <button class="btn btn-action btn-delete" type="submit" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette compétence ?')">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="3" class="text-center text-muted">Aucune compétence trouvée</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script de filtrage -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const searchCompetence = document.getElementById("searchCompetence");
+            const rows = document.querySelectorAll(".competence-row");
+
+            searchCompetence.addEventListener("input", function() {
+                const searchValue = searchCompetence.value.toLowerCase();
+                rows.forEach(row => {
+                    const competenceName = row.querySelector(".competence-name").textContent.toLowerCase();
+                    row.style.display = competenceName.includes(searchValue) ? "" : "none";
+                });
+            });
+        });
+    </script>
+
+    <style>
+        .glassmorphism-card {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(15px);
+            border-radius: 25px;
+            padding: 50px;
+            box-shadow: 0px 15px 30px rgba(0, 0, 0, 0.15);
+            max-width: 900px;
+            width: 100%;
+        }
+
+        .glassmorphism-header {
+            font-size: 28px;
+            font-weight: bold;
+            background: rgba(0, 123, 255, 0.2);
+            padding: 15px;
+            border-radius: 20px;
+            margin-bottom: 25px;
+        }
+
+        .custom-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 10px;
+        }
+
+        .custom-table th {
+            background: rgb(0, 0, 0);
+            color: white;
+            text-align: center;
+            padding: 16px;
+            border-bottom: 3px solid black;
+            font-weight: bold;
+        }
+
+        .custom-table td {
+            background: white;
+            padding: 14px;
+            text-align: center;
+            border-radius: 10px;
+        }
+
+        .btn-action {
+            border-radius: 50%;
+            padding: 10px;
+            margin: 3px;
+            transition: all 0.3s ease;
+        }
+        .btn-view { background: #17a2b8; color: white; }
+        .btn-edit { background: #ffc107; color: black; }
+        .btn-delete { background: #dc3545; color: white; }
+        .btn-action:hover { transform: scale(1.1); }
+
+        .btn-glass {
+            background: linear-gradient(45deg, #007bff, #00d4ff);
+            border: none;
+            color: white;
+            padding: 14px 24px;
+            border-radius: 30px;
+            font-weight: bold;
+            transition: all 0.3s ease-in-out;
+            box-shadow: 0px 4px 15px rgba(0, 123, 255, 0.4);
+        }
+
+        .btn-glass:hover {
+            background: linear-gradient(45deg, #0056b3, #0096c7);
+            box-shadow: 0px 6px 20px rgba(0, 123, 255, 0.6);
+        }
+
+        .search-bar {
+            border-radius: 30px;
+            padding: 14px;
+        }
+    </style>
 {% endblock %}

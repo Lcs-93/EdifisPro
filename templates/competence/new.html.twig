@@ -1,21 +1,97 @@
 {% extends 'base.html.twig' %}
 
+{% block title %}Ajouter une Compétence{% endblock %}
+
 {% block body %}
-    <h1>Ajouter une nouvelle compétence</h1>
+    <div class="container mt-5 d-flex justify-content-center">
+        <div class="glassmorphism-card shadow-lg p-5">
+            <div class="glassmorphism-header text-center">
+                <h2>🎓 Ajouter une Compétence</h2>
+            </div>
 
-    <!-- Affichage des messages d'erreur -->
-    {% for message in app.flashes('error') %}
-        <div class="alert alert-danger">
-            {{ message }}
+            <!-- Affichage des messages d'erreur -->
+            {% for message in app.flashes('error') %}
+                <div class="alert alert-danger">
+                    {{ message }}
+                </div>
+            {% endfor %}
+
+            <!-- Formulaire -->
+            {{ form_start(form) }}
+                <div class="mb-4">
+                    <label class="form-label fw-bold"><i class="fas fa-brain"></i> Nom de la Compétence</label>
+                    {{ form_widget(form.nomCompetence, {'attr': {'class': 'form-control custom-input', 'placeholder': 'Ex: Gestion de projet, Programmation...'}}) }}
+                    {{ form_errors(form.nomCompetence) }}
+                </div>
+
+                <div class="text-center mt-4">
+                    <button type="submit" class="btn btn-glass btn-lg">
+                        <i class="fas fa-save"></i> Ajouter
+                    </button>
+                    <a href="{{ path('app_competence_index') }}" class="btn btn-outline-secondary ms-3">
+                        <i class="fas fa-arrow-left"></i> Retour
+                    </a>
+                </div>
+            {{ form_end(form) }}
         </div>
-    {% endfor %}
+    </div>
 
-    <!-- Formulaire de création de compétence -->
-    {{ form_start(form) }}
-        {{ form_row(form.nomCompetence) }}
-        <button type="submit" class="btn btn-success">Créer</button>
-    {{ form_end(form) }}
+    <style>
+        .glassmorphism-card {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(12px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0px 10px 25px rgba(0, 0, 0, 0.2);
+            max-width: 600px;
+            width: 100%;
+        }
 
-    <a href="{{ path('app_competence_index') }}" class="btn btn-secondary">Retour à la liste</a>
+        .glassmorphism-header {
+            font-size: 26px;
+            font-weight: bold;
+            background: rgba(0, 123, 255, 0.2);
+            padding: 15px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .custom-input {
+            border-radius: 12px;
+            padding: 14px;
+            font-size: 16px;
+            background: rgba(255, 255, 255, 0.5);
+            transition: all 0.3s ease-in-out;
+            width: 100%;
+           
+        }
+
+        .custom-input:focus {
+            background: rgba(241, 241, 241, 0.8);
+            border: 2px solid #007bff;
+            box-shadow: 0px 0px 12px rgba(0, 123, 255, 0.3);
+        }
+
+        .btn-glass {
+            background: linear-gradient(45deg, #007bff, #00d4ff);
+            border: none;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+            transition: all 0.3s ease-in-out;
+            box-shadow: 0px 4px 15px rgba(0, 123, 255, 0.4);
+        }
+
+        .btn-glass:hover {
+            background: linear-gradient(45deg, #0056b3, #0096c7);
+            box-shadow: 0px 6px 20px rgba(0, 123, 255, 0.6);
+        }
+
+        .btn-outline-secondary {
+            border-radius: 25px;
+            padding: 12px 20px;
+        }
+
+    </style>
 {% endblock %}
-

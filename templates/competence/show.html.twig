@@ -1,28 +1,113 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Compétence{% endblock %}
+{% block title %}Détail de la Compétence{% endblock %}
 
 {% block body %}
-    <h1>Compétence: {{ competence.nomCompetence }}</h1>
+    <div class="container mt-5 d-flex justify-content-center">
+        <div class="glassmorphism-card shadow-lg p-5">
+            <div class="glassmorphism-header text-center">
+                <h2>🎓 {{ competence.nomCompetence }}</h2>
+            </div>
 
-    <table class="table">
-        <tbody>
-            <tr>
-                <th>Id</th>
-                <td>{{ competence.id }}</td>
-            </tr>
-            <tr>
-                <th>Nom de la compétence</th>
-                <td>{{ competence.nomCompetence }}</td>
-            </tr>
-        </tbody>
-    </table>
+            <!-- Tableau des détails -->
+            <table class="table custom-table mt-3">
+                <tbody>
+                    <tr>
+                        <th>ID</th>
+                        <td>{{ competence.id }}</td>
+                    </tr>
+                    <tr>
+                        <th>Nom de la Compétence</th>
+                        <td>{{ competence.nomCompetence }}</td>
+                    </tr>
+                </tbody>
+            </table>
 
-    <a href="{{ path('app_competence_edit', {'id': competence.id}) }}" class="btn btn-warning">Modifier</a>
-    <form action="{{ path('app_competence_delete', {'id': competence.id}) }}" method="POST" style="display:inline-block;">
-        <button class="btn btn-danger" type="submit" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette compétence ?')">Supprimer</button>
-        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ competence.id) }}">
-    </form>
+            <!-- Boutons d'actions -->
+            <div class="text-center mt-4">
+                <a href="{{ path('app_competence_edit', {'id': competence.id}) }}" class="btn btn-glass btn-lg">
+                    <i class="fas fa-edit"></i> Modifier
+                </a>
 
-    <a href="{{ path('app_competence_index') }}" class="btn btn-secondary">Retour à la liste</a>
+                <form action="{{ path('app_competence_delete', {'id': competence.id}) }}" method="POST" style="display:inline-block;">
+                    <button class="btn btn-danger btn-lg ms-2" type="submit" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette compétence ?')">
+                        <i class="fas fa-trash"></i> Supprimer
+                    </button>
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ competence.id) }}">
+                </form>
+
+                <a href="{{ path('app_competence_index') }}" class="btn btn-outline-secondary ms-3 btn-lg">
+                    <i class="fas fa-arrow-left"></i> Retour
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🎨 STYLES CSS -->
+    <style>
+        /* 🌟 Glassmorphism Style */
+        .glassmorphism-card {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(12px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0px 10px 25px rgba(0, 0, 0, 0.2);
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .glassmorphism-header {
+            font-size: 26px;
+            font-weight: bold;
+            background: rgba(0, 123, 255, 0.2);
+            padding: 15px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        /* 🌟 Tableau Modernisé */
+        .custom-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 8px;
+        }
+
+        .custom-table th {
+            background: rgb(0, 0, 0);
+            color: white;
+            text-align: center;
+            padding: 14px;
+            border-bottom: 2px solid black;
+            font-weight: bold;
+        }
+
+        .custom-table td {
+            background: white;
+            padding: 12px;
+            text-align: center;
+            border-radius: 8px;
+        }
+
+        /* 🌟 Boutons */
+        .btn-glass {
+            background: linear-gradient(45deg, #007bff, #00d4ff);
+            border: none;
+            color: white;
+            padding: 14px 24px;
+            border-radius: 30px;
+            font-weight: bold;
+            transition: all 0.3s ease-in-out;
+            box-shadow: 0px 4px 15px rgba(0, 123, 255, 0.4);
+        }
+
+        .btn-glass:hover {
+            background: linear-gradient(45deg, #0056b3, #0096c7);
+            box-shadow: 0px 6px 20px rgba(0, 123, 255, 0.6);
+        }
+
+        .btn-outline-secondary {
+            border-radius: 30px;
+            padding: 12px 20px;
+        }
+    </style>
 {% endblock %}
