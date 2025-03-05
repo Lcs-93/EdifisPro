@@ -1,55 +1,193 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}User index{% endblock %}
+{% block title %}Gestion des Utilisateurs{% endblock %}
 
 {% block body %}
-    <h1>User index</h1>
+    <div class="container mt-5 d-flex justify-content-center">
+        <div class="glassmorphism-card shadow-lg p-5">
+            <div class="glassmorphism-header text-center">
+                <h2>👤 Gestion des Utilisateurs</h2>
+            </div>
 
-    <table class="table">
-        <thead>
-        <tr>
-            <th>Id</th>
-            <th>Nom</th>
-            <th>Prénom</th>
-            <th>Email</th>
-            <th>Mot de passe</th>
-            <th>Rôle</th>
-            <th>Compétences</th>
-            <th>actions</th>
-        </tr>
-        </thead>
-        <tbody>
-        {% for user in users %}
-            <tr>
-                <td>{{ user.id }}</td>
-                <td>{{ user.nom }}</td>
-                <td>{{ user.prenom }}</td>
-                <td>{{ user.email }}</td>
-                <td>{{ user.password }}</td>
-                <td>{% for role in user.roles %}
-                        <li>{{ role }}</li>
-                    {% endfor %}</td>
-                <td>
-                    {% if user.competenceUsers() is not empty %}
-                            {% for competence in user.competenceUsers() %}
-                                <li>{{ competence.getCompetence().nomCompetence }}</li>
-                            {% endfor %}
-                    {% else %}
-                        <em>Aucune compétence</em>
-                    {% endif %}
-                </td>
-                <td>
-                    <a href="{{ path('app_user_show', {'id': user.id}) }}">afficher</a>
-                    <a href="{{ path('app_user_edit', {'id': user.id}) }}">modifier</a>
-                </td>
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="6">Aucun utilisateur trouvé</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+            <!-- Filtres -->
+            <div class="row mb-4 align-items-center">
+                <div class="col-md-5">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-search"></i></span>
+                        <input type="text" id="searchUser" class="form-control search-bar" placeholder="Rechercher un utilisateur...">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <select id="filterRole" class="form-select custom-select">
+                        <option value="">🎭 Filtrer par rôle</option>
+                        <option value="ROLE_ADMIN">👑 Administrateur</option>
+                        <option value="ROLE_USER">👤 Utilisateur</option>
+                    </select>
+                </div>
+                <div class="col-md-3 text-end">
+                    <a href="{{ path('app_user_new') }}" class="btn btn-glass btn-lg">
+                        <i class="fas fa-user-plus"></i> Ajouter un Utilisateur
+                    </a>
+                </div>
+            </div>
 
-    <a href="{{ path('app_user_new') }}">Créer un utilisateur</a>
+            <!-- Tableau des Utilisateurs -->
+            <div class="table-responsive">
+                <table class="table custom-table" id="userTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th><i class="fas fa-user"></i> Nom</th>
+                            <th><i class="fas fa-envelope"></i> Email</th>
+                            <th><i class="fas fa-user-tag"></i> Rôle</th>
+                            <th><i class="fas fa-cogs"></i> Compétences</th>
+                            <th><i class="fas fa-tools"></i> Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                            <tr class="user-row">
+                                <td><strong>{{ user.id }}</strong></td>
+                                <td class="user-name">{{ user.nom }} {{ user.prenom }}</td>
+                                <td>{{ user.email }}</td>
+                                <td>
+                                    {% for role in user.roles %}
+                                        <span class="badge role-badge {% if role == 'ROLE_ADMIN' %}admin{% else %}user{% endif %}" data-role="{{ role }}">
+                                            {{ role|replace({'ROLE_ADMIN': '👑 Admin', 'ROLE_USER': '👤 Utilisateur'}) }}
+                                        </span>
+                                    {% endfor %}
+                                </td>
+                                <td>
+                                    {% if user.competenceUsers() is not empty %}
+                                        {% for competence in user.competenceUsers() %}
+                                            <span class="badge competence-badge">{{ competence.getCompetence().nomCompetence }}</span>
+                                        {% endfor %}
+                                    {% else %}
+                                        <em class="text-muted">Aucune compétence</em>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{{ path('app_user_show', {'id': user.id}) }}" class="btn btn-action btn-view" title="Voir">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{{ path('app_user_edit', {'id': user.id}) }}" class="btn btn-action btn-edit" title="Modifier">
+                                        <i class="fas fa-pencil-alt"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="6" class="text-center text-muted">Aucun utilisateur trouvé</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script de filtrage -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const searchUser = document.getElementById("searchUser");
+            const filterRole = document.getElementById("filterRole");
+            const rows = document.querySelectorAll(".user-row");
+
+            function filterTable() {
+                const searchValue = searchUser.value.toLowerCase();
+                const roleValue = filterRole.value;
+
+                rows.forEach(row => {
+                    const name = row.querySelector(".user-name").textContent.toLowerCase();
+                    const roleBadges = row.querySelectorAll(".role-badge");
+                    let hasMatchingRole = roleValue === "" || Array.from(roleBadges).some(role => role.dataset.role === roleValue);
+                    let hasMatchingName = name.includes(searchValue);
+
+                    row.style.display = hasMatchingName && hasMatchingRole ? "" : "none";
+                });
+            }
+
+            searchUser.addEventListener("input", filterTable);
+            filterRole.addEventListener("change", filterTable);
+        });
+    </script>
+
+    <!-- 🎨 STYLES CSS -->
+    <style>
+        /* 🌟 Glassmorphism Style */
+        .glassmorphism-card {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(12px);
+            border-radius: 30px;
+            padding: 50px;
+            box-shadow: 0px 15px 30px rgba(0, 0, 0, 0.15);
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        .glassmorphism-header {
+            font-size: 28px;
+            font-weight: bold;
+            background: rgba(0, 123, 255, 0.2);
+            padding: 20px;
+            border-radius: 20px;
+            margin-bottom: 25px;
+        }
+
+        /* 🌟 Tableau Modernisé */
+        .custom-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 10px;
+        }
+
+        .custom-table th {
+            background: rgb(0, 0, 0);
+            color: white;
+            text-align: center;
+            padding: 16px;
+            border-bottom: 3px solid black;
+            font-weight: bold;
+        }
+
+        .custom-table td {
+            background: white;
+            padding: 14px;
+            text-align: center;
+            border-radius: 10px;
+        }
+
+        /* 🌟 Badges */
+        .role-badge {
+            padding: 10px 15px;
+            border-radius: 15px;
+            font-weight: bold;
+        }
+        .admin { background: #ff5733; color: white; }
+        .user { background: #007bff; color: white; }
+
+        .competence-badge {
+            background: #17a2b8;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 12px;
+        }
+
+        /* 🌟 Boutons Actions */
+        .btn-action {
+            border-radius: 50%;
+            padding: 10px;
+            margin: 3px;
+            transition: all 0.3s ease;
+        }
+        .btn-view { background: #17a2b8; color: white; }
+        .btn-edit { background: #ffc107; color: black; }
+        .btn-action:hover { transform: scale(1.1); }
+
+        /* 🌟 Input search */
+        .search-bar {
+            border-radius: 30px;
+            padding: 14px;
+        }
+    </style>
 {% endblock %}

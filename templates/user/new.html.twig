@@ -1,11 +1,238 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}New User{% endblock %}
+{% block title %}Créer un Nouvel Utilisateur{% endblock %}
 
 {% block body %}
-    <h1>Create new User</h1>
+    <div class="container mt-5 d-flex justify-content-center">
+        <div class="glassmorphism-card shadow-lg p-5">
+            <div class="glassmorphism-header text-center">
+                <h2>👤 Créer un Utilisateur</h2>
+            </div>
 
-    {{ include('user/_form.html.twig') }}
+            <!-- Formulaire -->
+            {{ form_start(form) }}
 
-    <a href="{{ path('app_user_list') }}">back to list</a>
+            <div class="mb-4">
+                <label class="form-label fw-bold"><i class="fas fa-user"></i> Nom</label>
+                {{ form_widget(form.nom, {'attr': {'class': 'form-control custom-input', 'placeholder': 'Entrez le nom'}}) }}
+                {{ form_errors(form.nom) }}
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label fw-bold"><i class="fas fa-user"></i> Prénom</label>
+                {{ form_widget(form.prenom, {'attr': {'class': 'form-control custom-input', 'placeholder': 'Entrez le prénom'}}) }}
+                {{ form_errors(form.prenom) }}
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label fw-bold"><i class="fas fa-envelope"></i> Email</label>
+                {{ form_widget(form.email, {'attr': {'class': 'form-control custom-input', 'placeholder': 'Entrez l\'email'}}) }}
+                {{ form_errors(form.email) }}
+            </div>
+
+<div class="mb-4">
+    <label class="form-label fw-bold"><i class="fas fa-lock"></i> Mot de passe</label>
+    <div class="input-group">
+        {{ form_widget(form.plainPassword, {'attr': {'class': 'form-control custom-input', 'type': 'password', 'placeholder': 'Entrez le mot de passe', 'id': 'passwordField', 'oninput': 'validatePassword()'}}) }}
+        <button class="btn btn-outline-secondary toggle-password" type="button" onclick="togglePassword()">
+            <i class="fas fa-eye" id="toggleIcon"></i>
+        </button>
+    </div>
+    <div class="password-strength mt-2">
+        <div id="passwordStrengthBar" class="progress">
+            <div id="passwordStrength" class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+        </div>
+        <small id="passwordMessage" class="text-muted"></small>
+    </div>
+    {{ form_errors(form.plainPassword) }}
+</div>
+
+
+            <div class="mb-4">
+                <label class="form-label fw-bold"><i class="fas fa-user-tag"></i> Rôle</label>
+                {{ form_widget(form.roles, {'attr': {'class': 'form-select custom-select'}}) }}
+                {{ form_errors(form.roles) }}
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label fw-bold"><i class="fas fa-cogs"></i> Compétences</label>
+                <div class="card p-3 glassmorphism-subcard">
+                    <div class="row">
+                        {% for competence in form.competences %}
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    {{ form_widget(competence, {'attr': {'class': 'form-check-input'}}) }}
+                                    {{ form_label(competence, null, {'label_attr': {'class': 'form-check-label'}}) }}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center mt-4">
+                <button type="submit" class="btn btn-glass btn-lg">
+                    <i class="fas fa-save"></i> Enregistrer
+                </button>
+                <a href="{{ path('app_user_list') }}" class="btn btn-outline-secondary ms-3">
+                    <i class="fas fa-arrow-left"></i> Retour
+                </a>
+            </div>
+
+            {{ form_end(form) }}
+        </div>
+    </div>
+
+
+    <style>
+       
+        .glassmorphism-card {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(15px);
+            border-radius: 25px;
+            padding: 50px;
+            box-shadow: 0px 15px 30px rgba(0, 0, 0, 0.15);
+            max-width: 700px;
+            width: 100%;
+        }
+
+        .glassmorphism-header {
+            font-size: 28px;
+            font-weight: bold;
+            background: rgba(0, 123, 255, 0.2);
+            padding: 15px;
+            border-radius: 20px;
+            margin-bottom: 25px;
+        }
+
+        .custom-input, .custom-select {
+       
+            border-radius: 12px;
+            padding: 14px;
+            font-size: 16px;
+            background: rgba(255, 255, 255, 0.5);
+            transition: all 0.3s ease-in-out;
+            width: 100%;
+        }
+
+        .custom-input:focus, .custom-select:focus {
+            background: rgba(255, 255, 255, 0.8);
+            border: 2px solid #007bff;
+            box-shadow: 0px 0px 12px rgba(0, 123, 255, 0.3);
+        }
+
+        .glassmorphism-subcard {
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(8px);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-check-input {
+            transform: scale(1.3);
+            margin-right: 10px;
+        }
+
+        .btn-glass {
+            background: linear-gradient(45deg, #007bff, #00d4ff);
+            border: none;
+            color: white;
+            padding: 14px 24px;
+            border-radius: 30px;
+            font-weight: bold;
+            transition: all 0.3s ease-in-out;
+            box-shadow: 0px 4px 15px rgba(0, 123, 255, 0.4);
+        }
+
+        .btn-glass:hover {
+            background: linear-gradient(45deg, #0056b3, #0096c7);
+            box-shadow: 0px 6px 20px rgba(0, 123, 255, 0.6);
+        }
+
+        .toggle-password {
+            border-radius: 12px;
+            border: none;
+            background: rgba(255, 255, 255, 0.6);
+            transition: all 0.3s ease-in-out;
+        }
+
+        .toggle-password:hover {
+            background: rgba(255, 255, 255, 0.9);
+        }
+.progress {
+    height: 8px;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    transition: width 0.3s ease-in-out;
+}
+
+    </style>
+
+    <script>
+        function togglePassword() {
+            let passwordField = document.getElementById("passwordField");
+            let toggleIcon = document.getElementById("toggleIcon");
+
+            if (passwordField.type === "password") {
+                passwordField.type = "text";
+                toggleIcon.classList.remove("fa-eye");
+                toggleIcon.classList.add("fa-eye-slash");
+            } else {
+                passwordField.type = "password";
+                toggleIcon.classList.remove("fa-eye-slash");
+                toggleIcon.classList.add("fa-eye");
+            }
+        }
+
+          function validatePassword() {
+        let password = document.getElementById("passwordField").value;
+        let strengthBar = document.getElementById("passwordStrength");
+        let message = document.getElementById("passwordMessage");
+
+        let strength = 0;
+        if (password.length >= 12) strength += 25;
+        if (/[A-Z]/.test(password)) strength += 25;
+        if (/\d/.test(password)) strength += 25;
+        if (/[\W_]/.test(password)) strength += 25;
+
+        strengthBar.style.width = strength + "%";
+
+        if (strength === 0) {
+            strengthBar.classList.remove("bg-success", "bg-warning", "bg-danger");
+            strengthBar.classList.add("bg-light");
+            message.innerHTML = "Mot de passe faible";
+        } else if (strength < 50) {
+            strengthBar.classList.remove("bg-success", "bg-light");
+            strengthBar.classList.add("bg-danger");
+            message.innerHTML = "Ajoutez une majuscule, un chiffre et un caractère spécial.";
+        } else if (strength < 100) {
+            strengthBar.classList.remove("bg-danger", "bg-light");
+            strengthBar.classList.add("bg-warning");
+            message.innerHTML = "Mot de passe acceptable, mais peut être renforcé.";
+        } else {
+            strengthBar.classList.remove("bg-danger", "bg-warning", "bg-light");
+            strengthBar.classList.add("bg-success");
+            message.innerHTML = "Mot de passe sécurisé ! ✅";
+        }
+    }
+
+    function togglePassword() {
+        let passwordField = document.getElementById("passwordField");
+        let toggleIcon = document.getElementById("toggleIcon");
+
+        if (passwordField.type === "password") {
+            passwordField.type = "text";
+            toggleIcon.classList.remove("fa-eye");
+            toggleIcon.classList.add("fa-eye-slash");
+        } else {
+            passwordField.type = "password";
+            toggleIcon.classList.remove("fa-eye-slash");
+            toggleIcon.classList.add("fa-eye");
+        }
+    }
+    </script>
 {% endblock %}

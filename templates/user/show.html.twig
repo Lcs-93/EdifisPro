@@ -1,59 +1,156 @@
 {% extends 'base.html.twig' %}
 
-
-{% block title %}User{% endblock %}
+{% block title %}Détails de l'Utilisateur{% endblock %}
 
 {% block body %}
-    <h1>User</h1>
+    <div class="container mt-5 d-flex justify-content-center">
+        <div class="glassmorphism-card shadow-lg p-5">
+            <div class="glassmorphism-header text-center">
+                <h2>👤 Détails de l'Utilisateur</h2>
+            </div>
 
-    <table class="table">
-        <tbody>
-            <tr>
-                <th>Id</th>
-                <td>{{ user.id }}</td>
-            </tr>
-            <tr>
-                <th>Nom</th>
-                <td>{{ user.nom }}</td>
-            </tr>
-            <tr>
-                <th>Prénom</th>
-                <td>{{ user.prenom }}</td>
-            </tr>
-            <tr>
-                <th>Email</th>
-                <td>{{ user.email }}</td>
-            </tr>
-            <tr>
-                <th>Password</th>
-                <td>{{ user.password }}</td>
-            </tr>
-            <tr>
-                <th>Rôle</th>
-                <td>{% for role in user.roles %}
-                        {{ role }}
-                    {% endfor %}</td>
-                <td>
-            </tr>
-            <tr>
-                <th>Compétences</th>
-                <td>
-                    {% if user.competenceUsers() is not empty %}
-                        {% for competence in user.competenceUsers() %}
-                            <li >{{ competence.getCompetence().nomCompetence }}</li>
-                        {% endfor %}
-                    {% else %}
-                        <em>Aucune compétence</em>
-                    {% endif %}
-                </td>
-            </tr>
+            <div class="row">
+                <div class="col-md-12">
+                    <table class="table user-info-table">
+                        <tbody>
+                            <tr>
+                                <th>ID</th>
+                                <td>{{ user.id }}</td>
+                            </tr>
+                            <tr>
+                                <th>Nom</th>
+                                <td>{{ user.nom }}</td>
+                            </tr>
+                            <tr>
+                                <th>Prénom</th>
+                                <td>{{ user.prenom }}</td>
+                            </tr>
+                            <tr>
+                                <th>Email</th>
+                                <td>{{ user.email }}</td>
+                            </tr>
+                            <tr>
+                                <th>Rôle</th>
+                                <td>
+                                    {% for role in user.roles %}
+                                        <span class="badge role-badge {% if role == 'ROLE_ADMIN' %}admin{% else %}user{% endif %}">
+                                            {{ role|replace({'ROLE_ADMIN': '👑 Admin', 'ROLE_USER': '👤 Utilisateur'}) }}
+                                        </span>
+                                    {% endfor %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Compétences</th>
+                                <td>
+                                    {% if user.competenceUsers() is not empty %}
+                                        {% for competence in user.competenceUsers() %}
+                                            <span class="badge competence-badge">{{ competence.getCompetence().nomCompetence }}</span>
+                                        {% endfor %}
+                                    {% else %}
+                                        <em class="text-muted">Aucune compétence</em>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
 
-        </tbody>
-    </table>
+            <div class="text-center mt-4">
+                <a href="{{ path('app_user_list') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Retour
+                </a>
+                <a href="{{ path('app_user_edit', {'id': user.id}) }}" class="btn btn-glass">
+                    <i class="fas fa-edit"></i> Modifier
+                </a>
+            </div>
 
-    <a href="{{ path('app_user_list') }}">Retourner à la liste</a>
+            <div class="text-center mt-3">
+                {{ include('user/_delete_form.html.twig') }}
+            </div>
+        </div>
+    </div>
 
-    <a href="{{ path('app_user_edit', {'id': user.id}) }}">Modifier</a>
+    <style>
+        .glassmorphism-card {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(15px);
+            border-radius: 25px;
+            padding: 50px;
+            box-shadow: 0px 15px 30px rgba(0, 0, 0, 0.15);
+            max-width: 700px;
+            width: 100%;
+        }
 
-    {{ include('user/_delete_form.html.twig') }}
+        .glassmorphism-header {
+            font-size: 28px;
+            font-weight: bold;
+            background: rgba(0, 123, 255, 0.2);
+            padding: 15px;
+            border-radius: 20px;
+            margin-bottom: 25px;
+        }
+
+        .user-info-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 10px;
+        }
+
+        .user-info-table th {
+            background: rgba(0, 123, 255, 0.2);
+            color: black;
+            text-align: left;
+            padding: 12px;
+            border-radius: 10px;
+            font-weight: bold;
+        }
+
+        .user-info-table td {
+            background: rgba(255, 255, 255, 0.5);
+            padding: 12px;
+            border-radius: 10px;
+        }
+
+        .role-badge {
+            padding: 10px 15px;
+            border-radius: 15px;
+            font-weight: bold;
+        }
+        .admin { background: #ff5733; color: white; }
+        .user { background: #007bff; color: white; }
+
+        .competence-badge {
+            background: #17a2b8;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 12px;
+        }
+
+        .btn-glass {
+            background: linear-gradient(45deg, #007bff, #00d4ff);
+            border: none;
+            color: white;
+            padding: 14px 24px;
+            border-radius: 30px;
+            font-weight: bold;
+            transition: all 0.3s ease-in-out;
+            box-shadow: 0px 4px 15px rgba(0, 123, 255, 0.4);
+        }
+
+        .btn-glass:hover {
+            background: linear-gradient(45deg, #0056b3, #0096c7);
+            box-shadow: 0px 6px 20px rgba(0, 123, 255, 0.6);
+        }
+
+        .btn-outline-secondary {
+            padding: 14px 24px;
+            border-radius: 30px;
+            font-weight: bold;
+        }
+
+        .btn-outline-secondary:hover {
+            background: rgba(0, 0, 0, 0.1);
+        }
+    </style>
 {% endblock %}
