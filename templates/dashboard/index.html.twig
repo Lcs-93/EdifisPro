@@ -56,53 +56,45 @@
                 </div>
             </div>
 
-            <!-- 🟢 Graphique des chantiers -->
-            <canvas id="chantierChart"></canvas>
-        </div>
-
-        {% if chantiers is not empty %}
-            <!-- 🟢 Tableau des chantiers -->
-            <div class="table-responsive">
-                <table class="table custom-table">
-                    <thead>
-                        <tr>
-                            <th>Chantier</th>
-                            <th>Statut</th>
-                            <th>Date Début</th>
-                            <th>Date Fin</th>
-                            <th>Équipes Affectées</th>
-                        </tr>
-                    </thead>
-                    <tbody id="chantierTableBody">
-                        {% for chantier in chantiers %}
-                            <tr data-status="{{ chantier.status }}">
-                                <td>{{ chantier.lieu }}</td>
-                                <td>
-                                    <span class="status-badge status-{{ chantier.status }}">
-                                        {{ chantier.status|replace({'en_cours': 'En cours', 'en_pause': 'En pause', 'termine': 'Terminé'}) }}
-                                    </span>
-                                </td>
-                                <td>{{ chantier.dateDebut|date("d/m/Y") }}</td>
-                                <td>{{ chantier.dateFin|date("d/m/Y") }}</td>
-                                <td>
-                                    <ul class="list-unstyled">
-                                        {% for affectation in chantier.affectations %}
-                                            <li>
-                                                <strong>{{ affectation.equipe.nomEquipe }}</strong>
-                                                ({{ affectation.equipe.dateDebut|date("d/m/Y") }} - {{ affectation.equipe.dateFin|date("d/m/Y") }})
-                                            </li>
-                                        {% endfor %}
-                                    </ul>
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-
-                <!-- Pagination -->
-                <nav>
-                    <ul class="pagination justify-content-center" id="pagination"></ul>
-                </nav>
+            <!-- 📌 Liste des Chantiers -->
+            <div class="tab-pane fade" id="list-chantier">
+                <div class="card shadow-lg p-4">
+                    <h4 class="text-secondary"><i class="fas fa-list"></i> Liste des Chantiers</h4>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th>Chantier</th>
+                                    <th>Statut</th>
+                                    <th>Date Début</th>
+                                    <th>Date Fin</th>
+                                    <th>Équipes Affectées</th>
+                                </tr>
+                            </thead>
+                            <tbody id="chantierTableBody">
+                                {% for chantier in chantiers %}
+                                    <tr class="chantier-row" data-status="{{ chantier.status }}">
+                                        <td>{{ chantier.lieu }}</td>
+                                        <td>
+                                            <span class="badge bg-{{ chantier.status == 'en_cours' ? 'success' : (chantier.status == 'en_pause' ? 'warning' : 'secondary') }}">
+                                                {{ chantier.status|replace({'en_cours': 'En cours', 'en_pause': 'En pause', 'termine': 'Terminé'}) }}
+                                            </span>
+                                        </td>
+                                        <td>{{ chantier.dateDebut|date("d/m/Y") }}</td>
+                                        <td>{{ chantier.dateFin|date("d/m/Y") }}</td>
+                                        <td>
+                                            <ul class="list-unstyled">
+                                                {% for affectation in chantier.affectations %}
+                                                    <li><strong>{{ affectation.equipe.nomEquipe }}</strong></li>
+                                                {% endfor %}
+                                            </ul>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
