@@ -33,13 +33,16 @@
                 <ul class="navbar-nav ms-auto">
                     {% if is_granted('ROLE_ADMIN') %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ path('app_chantier_new') }}">Créer un chantier</a>
+                            <a class="nav-link" href="{{ path('app_dashboard') }}">Dashboard</a>
+                        </li>
+                              <li class="nav-item">
+                            <a class="nav-link" href="{{ path('app_equipe_index') }}">Gestion equipes</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ path('app_chantier_index') }}">Voir les chantiers</a>
+                            <a class="nav-link" href="{{ path('app_chantier_index') }}">Gestion chantiers</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ path('app_competence_index') }}">Gérer les compétences</a>
+                            <a class="nav-link" href="{{ path('app_competence_index') }}">Gestion compétences</a>
                         </li>
                     {% endif %}
                 </ul>
