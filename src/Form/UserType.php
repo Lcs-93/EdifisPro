@@ -11,6 +11,7 @@ use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
@@ -21,15 +22,26 @@ class UserType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+	    $isEdit = $options['is_edit']; // Vérifier si on est en mode édition
+	    $generatedPassword = $options['generated_password'] ?? ''; // Récupérer le MDP généré
+
         $builder
             ->add('nom')
             ->add('prenom')
             ->add('email')
-	        ->add('password', PasswordType::class, [
-		        'mapped' => false, // On ne lie pas ce champ à l'entité User
-		        'required' => false, // L'utilisateur n'est pas obligé de modifier son mot de passe
-		        'attr' => ['autocomplete' => 'new-password'],
-		        'label' => 'Nouveau mot de passe',
+	        ->add('plainPassword', $isEdit ? PasswordType::class  : TextType::class, [
+		        'mapped' => false, // Ne pas mapper ce champ à l'entité User
+		        'required' => !$isEdit, // Obligatoire uniquement en création
+		        'attr' => [
+			        'autocomplete' => 'new-password',
+			        'value' => $generatedPassword, // 🔥 Pré-remplir avec le MDP généré
+		        ],
+		        'label' => $isEdit ? 'Nouveau mot de passe' : 'Mot de passe',
+		        'constraints' => $isEdit ? [] : [
+			        new NotBlank([
+				        'message' => 'Veuillez entrer un mot de passe',
+			        ]),
+		        ],
 	        ])
 	        ->add('roles', ChoiceType::class, [
 		        'choices' => [
@@ -84,6 +96,8 @@ class UserType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => User::class,
+	        'is_edit' => false, // Option pour savoir si on est en édition
+	        'generated_password' => '', // Option pour stocker le MDP généré
         ]);
     }
 }

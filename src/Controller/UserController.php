@@ -36,14 +36,27 @@ final class UserController extends AbstractController
     public function new(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher): Response
     {
         $user = new User();
-        $form = $this->createForm(UserType::class, $user);
-        $form->handleRequest($request);
+
+	    // Générer un mot de passe aléatoire
+	    $randomPassword = bin2hex(random_bytes(8)); // Génère un mot de passe aléatoire de 8 caractères
+	    // 🔹 Définir le mot de passe hashé pour l'enregistrement en BDD
+	    $user->setPassword($passwordHasher->hashPassword($user, $randomPassword));
+
+	    // 🔹 Créer le formulaire en pré-remplissant le champ plainPassword
+	    $form = $this->createForm(UserType::class, $user, [
+		    'is_edit' => false,
+		    'generated_password' => $randomPassword, // On passe le MDP généré à UserType
+	    ]);
+		$form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
 	        $competences = $form->get('competences')->getData();
 
-	        $hashedPassword = $passwordHasher->hashPassword($user, $form->get('plainPassword')->getData());
-	        $user->setPassword($hashedPassword);
+	        $newPassword = $form->get('plainPassword')->getData();
+	        if ($newPassword) {
+		        $user->setPassword($passwordHasher->hashPassword($user, $newPassword));
+	        }
+
             $entityManager->persist($user);
             $entityManager->flush();
 
@@ -77,15 +90,16 @@ final class UserController extends AbstractController
     #[Route('/{id}/edit', name: 'app_user_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, User $user, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher): Response
     {
-        $form = $this->createForm(UserType::class, $user);
-        $form->handleRequest($request);
+	    $form = $this->createForm(UserType::class, $user, [
+		    'is_edit' => true,]);
+		$form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
 	        foreach ($user->getCompetenceUsers() as $competenceUser) {
 		        $entityManager->remove($competenceUser);
 	        }
 
-	        $newPassword = $form->get('password')->getData();
+	        $newPassword = $form->get('plainPassword')->getData();
 	        if ($newPassword) {
 		        $user->setPassword($passwordHasher->hashPassword($user, $newPassword));
 	        }
