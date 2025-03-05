@@ -85,10 +85,12 @@ final class UserController extends AbstractController
 		        $entityManager->remove($competenceUser);
 	        }
 
-	        $competences = $form->get('competences')->getData();
-	        $hashedPassword = $passwordHasher->hashPassword($user, $form->get('plainPassword')->getData());
-	        $user->setPassword($hashedPassword);
+	        $newPassword = $form->get('password')->getData();
+	        if ($newPassword) {
+		        $user->setPassword($passwordHasher->hashPassword($user, $newPassword));
+	        }
 
+	        $competences = $form->get('competences')->getData();
 	        foreach ($competences as $competence) {
 		        $competenceUser = new CompetenceUser();
 		        $competenceUser->setUtilisateur($user);

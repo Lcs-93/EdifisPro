@@ -25,13 +25,11 @@ class UserType extends AbstractType
             ->add('nom')
             ->add('prenom')
             ->add('email')
-	        ->add('plainPassword', PasswordType::class, [
-		        'mapped' => false,
-		        'constraints' => [
-			        new NotBlank([
-				        'message' => 'Veuillez entrer un mot de passe',
-			        ]),
-		        ],
+	        ->add('password', PasswordType::class, [
+		        'mapped' => false, // On ne lie pas ce champ à l'entité User
+		        'required' => false, // L'utilisateur n'est pas obligé de modifier son mot de passe
+		        'attr' => ['autocomplete' => 'new-password'],
+		        'label' => 'Nouveau mot de passe',
 	        ])
 	        ->add('roles', ChoiceType::class, [
 		        'choices' => [
