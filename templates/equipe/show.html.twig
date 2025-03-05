@@ -3,57 +3,149 @@
 {% block title %}Détails de l'Équipe{% endblock %}
 
 {% block body %}
-    <div class="container mt-5">
-        <div class="card shadow-lg p-4">
-            <h1 class="text-center text-primary mb-4">{{ equipe.nomEquipe }}</h1>
+    <div class="container mt-5 d-flex justify-content-center">
+        <div class="glassmorphism-card shadow-lg p-4">
+            <div class="glassmorphism-header text-center">
+                <h2>👥 {{ equipe.nomEquipe }}</h2>
+            </div>
 
-            <div class="row">
-                <!-- Détails de l'équipe -->
-                <div class="col-md-6">
-                    <h4 class="text-secondary">Informations générales</h4>
-                    <ul class="list-group">
-                        <li class="list-group-item"><strong>ID:</strong> {{ equipe.id }}</li>
-                        <li class="list-group-item"><strong>Nom de l'équipe:</strong> {{ equipe.nomEquipe }}</li>
-                        <li class="list-group-item"><strong>Chef d'équipe:</strong> 
-                            {% if equipe.chefEquipe %}
-                                {{ equipe.chefEquipe.nom }} {{ equipe.chefEquipe.prenom }}
-                            {% else %}
-                                <span class="text-muted">Aucun chef d'équipe</span>
-                            {% endif %}
-                        </li>
-                        <li class="list-group-item"><strong>Date de début:</strong> {{ equipe.dateDebut|date('d/m/Y') }}</li>
-                        <li class="list-group-item"><strong>Date de fin:</strong> {{ equipe.dateFin|date('d/m/Y') }}</li>
-                    </ul>
-                </div>
-
-                <!-- Liste des membres -->
-                <div class="col-md-6">
-                    <h4 class="text-secondary">Membres affectés</h4>
-                    {% if equipe.equipeUsers|length > 0 %}
-                        <ul class="list-group">
-                            {% for equipeUser in equipe.equipeUsers %}
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    {{ equipeUser.utilisateur.nom }} {{ equipeUser.utilisateur.prenom }}
-                                    <span class="badge bg-info">Affecté</span>
-                                </li>
-                            {% endfor %}
+            <div class="glassmorphism-body">
+                <div class="row">
+                    <!-- Détails de l'équipe -->
+                    <div class="col-md-6">
+                        <h4 class="text-secondary"><i class="fas fa-info-circle"></i> Informations Générales</h4>
+                        <ul class="list-group custom-list">
+                            <li><strong>ID:</strong> {{ equipe.id }}</li>
+                            <li><strong>Nom de l'équipe:</strong> {{ equipe.nomEquipe }}</li>
+                            <li><strong>Chef d'équipe:</strong> 
+                                {% if equipe.chefEquipe %}
+                                    <span class="badge badge-chef">{{ equipe.chefEquipe.nom }} {{ equipe.chefEquipe.prenom }}</span>
+                                {% else %}
+                                    <span class="text-muted">Aucun chef d'équipe</span>
+                                {% endif %}
+                            </li>
+                            <li><strong>Date de début:</strong> {{ equipe.dateDebut|date('d/m/Y') }}</li>
+                            <li><strong>Date de fin:</strong> {{ equipe.dateFin|date('d/m/Y') }}</li>
                         </ul>
-                    {% else %}
-                        <p class="text-muted">Aucun membre affecté à cette équipe.</p>
-                    {% endif %}
+                    </div>
+
+                    <!-- Liste des membres -->
+                    <div class="col-md-6">
+                        <h4 class="text-secondary"><i class="fas fa-users"></i> Membres Affectés</h4>
+                        {% if equipe.equipeUsers|length > 0 %}
+                            <ul class="list-group custom-list">
+                                {% for equipeUser in equipe.equipeUsers %}
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <i class="fas fa-user"></i> {{ equipeUser.utilisateur.nom }} {{ equipeUser.utilisateur.prenom }}
+                                        <span class="badge badge-membre">Affecté</span>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p class="text-muted">Aucun membre affecté à cette équipe.</p>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
 
             <!-- Boutons d'actions -->
             <div class="text-center mt-4">
-                <a href="{{ path('app_equipe_index') }}" class="btn btn-outline-secondary">
+                <a href="{{ path('app_equipe_index') }}" class="btn btn-outline-secondary btn-glass">
                     <i class="fas fa-arrow-left"></i> Retour
                 </a>
-                <a href="{{ path('app_equipe_edit', {'id': equipe.id}) }}" class="btn btn-warning">
+                <a href="{{ path('app_equipe_edit', {'id': equipe.id}) }}" class="btn btn-warning btn-glass">
                     <i class="fas fa-edit"></i> Modifier
                 </a>
                 {{ include('equipe/_delete_form.html.twig') }}
             </div>
         </div>
     </div>
+
+    <!-- 🎨 STYLES CSS -->
+    <style>
+        /* 🌟 Glassmorphism Style */
+        .glassmorphism-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.1);
+            max-width: 850px;
+            width: 100%;
+        }
+
+        .glassmorphism-header {
+            font-size: 24px;
+            font-weight: bold;
+            background: rgba(0, 123, 255, 0.2);
+            padding: 15px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .glassmorphism-body {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 🌟 Liste Custom */
+        .custom-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .custom-list li {
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            margin-bottom: 8px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            font-weight: 500;
+        }
+
+        /* 🌟 Badges */
+        .badge-chef {
+            background: #007bff;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 10px;
+        }
+
+        .badge-membre {
+            background: #17a2b8;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 10px;
+        }
+
+        /* 🌟 Boutons Glassmorphism */
+        .btn-glass {
+            background: linear-gradient(45deg, #007bff, #00d4ff);
+            border: none;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+            transition: all 0.3s ease-in-out;
+            box-shadow: 0px 4px 15px rgba(0, 123, 255, 0.4);
+        }
+
+        .btn-glass:hover {
+            background: linear-gradient(45deg, #0056b3, #0096c7);
+            box-shadow: 0px 6px 20px rgba(0, 123, 255, 0.6);
+        }
+
+        /* 🌟 Animation Fade In */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .glassmorphism-card {
+            animation: fadeIn 0.8s ease-in-out;
+        }
+    </style>
 {% endblock %}

@@ -4,75 +4,76 @@
 
 {% block body %}
     <div class="container mt-5">
-        <div class="card shadow-lg p-4">
+        <div class="glassmorphism-card shadow-lg p-4">
             <h1 class="text-center text-primary mb-4">
-                <i class="fas fa-hard-hat"></i> Gestion des Chantiers
+                <span class="material-icons-round">construction</span> <span class="fw-bold">Gestion des Chantiers</span>
             </h1>
 
             <!-- Filtres -->
-            <div class="row mb-4">
-                <div class="col-md-6">
-                    <input type="text" id="searchLieu" class="form-control" placeholder="🔍 Rechercher par lieu...">
+            <div class="row mb-4 align-items-center">
+                <div class="col-md-5">
+                    <div class="input-group">
+                        <span class="input-group-text"><span class="material-icons-round">search</span></span>
+                        <input type="text" id="searchLieu" class="form-control search-bar" placeholder="Rechercher un chantier par adresse...">
+                    </div>
                 </div>
                 <div class="col-md-4">
-                    <select id="filterStatus" class="form-select">
+                    <select id="filterStatus" class="form-select custom-select">
                         <option value="">📌 Filtrer par statut</option>
                         <option value="En cours">⚠️ En cours</option>
                         <option value="En pause">⏸️ En pause</option>
                         <option value="Terminé">✅ Terminé</option>
                     </select>
                 </div>
-                <div class="col-md-2 text-end">
-                    <a href="{{ path('app_chantier_new') }}" class="btn btn-success btn-lg">
-                        <i class="fas fa-plus-circle"></i> Ajouter
+                <div class="col-md-3 text-end">
+                    <a href="{{ path('app_chantier_new') }}" class="btn btn-glass btn-lg">
+                        <span class="material-icons-round">add_circle</span> Ajouter un Chantier
                     </a>
                 </div>
             </div>
 
             <!-- Tableau des Chantiers -->
             <div class="table-responsive">
-                <table class="table table-hover table-striped align-middle" id="chantierTable">
-                    <thead class="table-dark text-center">
+                <table class="table custom-table" id="chantierTable">
+                    <thead>
                         <tr>
-                            <th><i class="fas fa-hashtag"></i> ID</th>
-                            <th><i class="fas fa-map-marker-alt"></i> Adresse</th>
-                            <th><i class="fas fa-calendar-day"></i> Date Début</th>
-                            <th><i class="fas fa-calendar-check"></i> Date Fin</th>
-                            <th><i class="fas fa-tasks"></i> Status</th>
-                            <th><i class="fas fa-cogs"></i> Actions</th>
+                            <th>ID</th>
+                            <th><span class="material-icons-round">location_on</span> Adresse</th>
+                            <th><span class="material-icons-round">event</span> Date Début</th>
+                            <th><span class="material-icons-round">event_available</span> Date Fin</th>
+                            <th><span class="material-icons-round">assignment</span> Statut</th>
+                            <th><span class="material-icons-round">settings</span> Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for chantier in chantiers %}
-                            <tr class="text-center chantier-row">
+                            <tr class="chantier-row">
                                 <td><strong>{{ chantier.id }}</strong></td>
                                 <td class="chantier-lieu">{{ chantier.lieu }}</td>
-                                <td>{{ chantier.dateDebut ? chantier.dateDebut|date('d/m/Y H:i') : '' }}</td>
-                                <td>{{ chantier.dateFin ? chantier.dateFin|date('d/m/Y H:i') : '' }}</td>
+                                <td>{{ chantier.dateDebut ? chantier.dateDebut|date('d/m/Y') : 'N/A' }}</td>
+                                <td>{{ chantier.dateFin ? chantier.dateFin|date('d/m/Y') : 'N/A' }}</td>
                                 <td class="chantier-status">
                                     {% if chantier.status == 'en_cours' %}
-                                        <span class="badge bg-warning text-dark">⚠️ En cours</span>
+                                        <span class="badge status-badge ongoing"><span class="material-icons-round">warning</span> En cours</span>
                                     {% elseif chantier.status == 'en_pause' %}
-                                        <span class="badge bg-secondary">⏸️ En pause</span>
+                                        <span class="badge status-badge paused"><span class="material-icons-round">pause_circle</span> En pause</span>
                                     {% elseif chantier.status == 'termine' %}
-                                        <span class="badge bg-success">✅ Terminé</span>
+                                        <span class="badge status-badge completed"><span class="material-icons-round">check_circle</span> Terminé</span>
                                     {% else %}
                                         <span class="badge bg-light text-dark">Inconnu</span>
                                     {% endif %}
                                 </td>
                                 <td>
-                                    <a href="{{ path('app_chantier_show', {'id': chantier.id}) }}" class="btn btn-info btn-sm me-1" title="Voir">
-                                        <i class="fas fa-eye"></i>
+                                    <a href="{{ path('app_chantier_show', {'id': chantier.id}) }}" class="btn btn-action btn-view" title="Voir">
+                                        <span class="material-icons-round">visibility</span>
                                     </a>
-                                    <a href="{{ path('app_chantier_edit', {'id': chantier.id}) }}" class="btn btn-warning btn-sm me-1" title="Modifier">
-                                        <i class="fas fa-pencil-alt"></i>
+                                    <a href="{{ path('app_chantier_edit', {'id': chantier.id}) }}" class="btn btn-action btn-edit" title="Modifier">
+                                        <span class="material-icons-round">edit</span>
                                     </a>
-                               
-                               
                                     <form method="post" action="{{ path('app_chantier_delete', {'id': chantier.id}) }}" onsubmit="return confirm('Voulez-vous vraiment supprimer ce chantier ?');" class="d-inline">
                                         <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ chantier.id) }}">
-                                        <button class="btn btn-danger btn-sm" title="Supprimer">
-                                            <i class="fas fa-trash-alt"></i>
+                                        <button class="btn btn-action btn-delete" title="Supprimer">
+                                            <span class="material-icons-round">delete</span>
                                         </button>
                                     </form>
                                 </td>
@@ -88,34 +89,78 @@
         </div>
     </div>
 
-    <!-- Script de filtrage -->
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const searchLieu = document.getElementById("searchLieu");
-            const filterStatus = document.getElementById("filterStatus");
-            const rows = document.querySelectorAll(".chantier-row");
+ 
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Material+Icons+Round');
 
-            function filterTable() {
-                const searchValue = searchLieu.value.toLowerCase();
-                const statusValue = filterStatus.value.toLowerCase();
+    
+        .glassmorphism-card {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.1);
+        }
 
-                rows.forEach(row => {
-                    const lieu = row.querySelector(".chantier-lieu").textContent.toLowerCase();
-                    const status = row.querySelector(".chantier-status").textContent.toLowerCase();
+ 
+        .custom-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 8px;
+        }
 
-                    const matchesLieu = lieu.includes(searchValue);
-                    const matchesStatus = statusValue === "" || status.includes(statusValue);
+        .custom-table th {
+            background: #111;
+            color: white;
+            text-align: center;
+            padding: 14px;
+            border-bottom: 2px solid black;
+            font-weight: bold;
+        }
 
-                    if (matchesLieu && matchesStatus) {
-                        row.style.display = "";
-                    } else {
-                        row.style.display = "none";
-                    }
-                });
-            }
+        .custom-table td {
+            background: white;
+            padding: 12px;
+            text-align: center;
+            border-radius: 8px;
+        }
 
-            searchLieu.addEventListener("input", filterTable);
-            filterStatus.addEventListener("change", filterTable);
-        });
-    </script>
+    
+        .status-badge {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 8px 12px;
+            border-radius: 12px;
+            font-weight: bold;
+        }
+        .ongoing { background: #ffc107; color: black; }
+        .paused { background: #6c757d; color: white; }
+        .completed { background: #28a745; color: white; }
+
+
+        .btn-action {
+            border-radius: 50%;
+            padding: 8px;
+            margin: 2px;
+            transition: all 0.3s ease;
+        }
+        .btn-view { background: #17a2b8; color: white; }
+        .btn-edit { background: #ffc107; color: black; }
+        .btn-delete { background: #dc3545; color: white; }
+        .btn-action:hover { transform: scale(1.1); }
+
+
+        .material-icons-round {
+            font-size: 20px;
+            vertical-align: middle;
+        }
+
+
+        .search-bar {
+            border-radius: 30px;
+            padding: 12px;
+        }
+    </style>
 {% endblock %}

@@ -3,15 +3,15 @@
 {% block title %}Détails du Chantier{% endblock %}
 
 {% block body %}
-    <div class="container mt-5">
-        <div class="card shadow-lg p-4">
-            <div class="card-header bg-primary text-white text-center">
+    <div class="container mt-5 d-flex justify-content-center">
+        <div class="glassmorphism-card shadow-lg p-4">
+            <div class="glassmorphism-header text-center">
                 <h2><i class="fas fa-hard-hat"></i> Détails du Chantier</h2>
             </div>
-            <div class="card-body">
-                <table class="table table-bordered">
+
+            <div class="glassmorphism-body">
+                <table class="table custom-table">
                     <tbody>
-                    
                         <tr>
                             <th><i class="fas fa-map-marker-alt"></i> Adresse</th>
                             <td>{{ chantier.lieu }}</td>
@@ -28,11 +28,11 @@
                             <th><i class="fas fa-info-circle"></i> Statut</th>
                             <td>
                                 {% if chantier.status == 'en_cours' %}
-                                    <span class="badge bg-warning text-dark">⚠️ En cours</span>
+                                    <span class="badge status-badge ongoing">⚠️ En cours</span>
                                 {% elseif chantier.status == 'en_pause' %}
-                                    <span class="badge bg-secondary">⏸️ En pause</span>
+                                    <span class="badge status-badge paused">⏸️ En pause</span>
                                 {% elseif chantier.status == 'termine' %}
-                                    <span class="badge bg-success">✅ Terminé</span>
+                                    <span class="badge status-badge completed">✅ Terminé</span>
                                 {% else %}
                                     <span class="badge bg-light text-dark">Inconnu</span>
                                 {% endif %}
@@ -42,15 +42,97 @@
                 </table>
             </div>
 
-            <div class="card-footer text-center">
-                <a href="{{ path('app_chantier_index') }}" class="btn btn-secondary me-2">
-                    <i class="fas fa-arrow-left"></i> Retour à la liste
+            <div class="text-center mt-4">
+                <a href="{{ path('app_chantier_index') }}" class="btn btn-outline-secondary btn-glass">
+                    <i class="fas fa-arrow-left"></i> Retour
                 </a>
-                <a href="{{ path('app_chantier_edit', {'id': chantier.id}) }}" class="btn btn-warning me-2">
+                <a href="{{ path('app_chantier_edit', {'id': chantier.id}) }}" class="btn btn-warning btn-glass">
                     <i class="fas fa-edit"></i> Modifier
                 </a>
                 {{ include('chantier/_delete_form.html.twig') }}
             </div>
         </div>
     </div>
+
+  
+    <style>
+    
+        .glassmorphism-card {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            width: 100%;
+        }
+
+        .glassmorphism-header {
+            font-size: 22px;
+            font-weight: bold;
+            background: rgba(0, 123, 255, 0.2);
+            padding: 15px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .glassmorphism-body {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+
+        .custom-table th {
+            text-align: left;
+            background: transparent;
+            font-weight: bold;
+            padding: 10px;
+        }
+
+        .custom-table td {
+            text-align: left;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+        }
+
+   
+        .status-badge {
+            padding: 8px 12px;
+            border-radius: 12px;
+            font-weight: bold;
+        }
+        .ongoing { background: #ffc107; color: black; }
+        .paused { background: #6c757d; color: white; }
+        .completed { background: #28a745; color: white; }
+
+
+        .btn-glass {
+            background: linear-gradient(45deg, #007bff, #00d4ff);
+            border: none;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+            transition: all 0.3s ease-in-out;
+            box-shadow: 0px 4px 15px rgba(0, 123, 255, 0.4);
+        }
+
+        .btn-glass:hover {
+            background: linear-gradient(45deg, #0056b3, #0096c7);
+            box-shadow: 0px 6px 20px rgba(0, 123, 255, 0.6);
+        }
+
+ 
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .glassmorphism-card {
+            animation: fadeIn 0.8s ease-in-out;
+        }
+    </style>
 {% endblock %}

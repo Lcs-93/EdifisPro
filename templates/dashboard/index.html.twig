@@ -6,7 +6,6 @@
     <div class="container mt-5">
         <h1 class="text-center text-primary mb-4"><i class="fas fa-tachometer-alt"></i> Tableau de Bord</h1>
 
-        <!-- 🟢 Bouton pour afficher/cacher la carte du graphique -->
         <div class="text-end mb-3">
             <button id="toggleGraphBtn" class="btn btn-outline-primary">
                 <i class="fas fa-chart-line"></i> Afficher/Masquer Graphique
@@ -21,7 +20,6 @@
                 <p class="text-muted">Voici les chantiers auxquels vous êtes affecté.</p>
             {% endif %}
 
-            <!-- 🟢 Filtres -->
             <div class="row g-3 mb-3">
                 <div class="col-md-4">
                     <label for="monthPicker" class="form-label fw-bold">Sélectionnez un mois :</label>
@@ -38,12 +36,10 @@
                 </div>
             </div>
 
-            <!-- 🟢 Graphique des chantiers -->
             <canvas id="chantierChart"></canvas>
         </div>
 
         {% if chantiers is not empty %}
-            <!-- 🟢 Tableau des chantiers -->
             <div class="table-responsive">
                 <table class="table custom-table">
                     <thead>
