@@ -13,7 +13,7 @@
 
     <form id="editProfileForm" method="post" action="{{ path('user_edit_modal') }}">
         <!-- Champs Nom et Prénom -->
-        <div class="row">
+        <div class="row mb-3">
             <div class="col-md-6">
                 {{ form_row(form.nom, {'attr': {'class': 'form-control'}}) }}
             </div>
@@ -23,13 +23,18 @@
         </div>
 
         <hr>
- 
-            
-        
 
-        <div class="row">
+        <!-- Champ Mot de Passe -->
+        <div class="row mb-3">
             <div class="col-md-6">
                 {{ form_row(form.plainPassword, {'attr': {'class': 'form-control', 'type': 'password'}}) }}
+            </div>
+        </div>
+
+        <!-- Champ Email -->
+        <div class="row mb-3">
+            <div class="col-md-12">
+                {{ form_row(form.email, {'attr': {'class': 'form-control'}}) }}
             </div>
         </div>
 
