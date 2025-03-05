@@ -15,11 +15,11 @@
         {% block importmap %}{{ importmap('app') }}{% endblock %}
     {% endblock %}
 </head>
-<body>
+<body class="bg-white"> <!-- Ajout de bg-white pour éviter un background bleu global -->
 
     <!-- Afficher la navbar uniquement si l'utilisateur est connecté -->
     {% if app.user %}
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <nav class="navbar navbar-expand-lg navbar-light bg-white">
         <div class="container">
             <!-- Vérifie si l'utilisateur est un admin pour rediriger vers la bonne page -->
             <a class="navbar-brand" href="{% if is_granted('ROLE_ADMIN') %}{{ path('app_chantier_index') }}{% else %}{{ path('user_dashboard') }}{% endif %}">
@@ -45,18 +45,18 @@
                 </ul>
 
                 <!-- Menu "Compte" placé en dernier -->
-                <ul class="navbar-nav ms-auto"> <!-- ms-auto pousse ce menu à la fin -->
+                <ul class="navbar-nav"> <!-- ms-auto pousse ce menu à la fin -->
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
                             Compte
                         </a>
                         <ul class="dropdown-menu">
                             <li>
-                                <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#editProfileModal">
+                                <button type="button" class="dropdown-item btn btn-primary btn-sm rounded-0" data-bs-toggle="modal" data-bs-target="#editProfileModal">
                                     Modifier mon profil
                                 </button>
                             </li>
-                            <li><a class="dropdown-item" href="{{ path('app_logout') }}">Déconnexion</a></li>
+                            <li><a class="dropdown-item btn btn-danger btn-sm rounded-0" href="{{ path('app_logout') }}">Déconnexion</a></li>
                         </ul>
                     </li>
                 </ul>
