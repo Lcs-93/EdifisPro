@@ -22,7 +22,7 @@
     <nav class="navbar navbar-expand-lg navbar-light bg-white">
         <div class="container">
             <!-- Vérifie si l'utilisateur est un admin pour rediriger vers la bonne page -->
-            <a class="navbar-brand" href="{% if is_granted('ROLE_ADMIN') %}{{ path('app_chantier_index') }}{% else %}{{ path('user_dashboard') }}{% endif %}">
+            <a class="navbar-brand" href="{% if is_granted('ROLE_ADMIN') %}{{ path('app_dashboard') }}{% else %}{{ path('user_dashboard') }}{% endif %}">
                 Mon Application
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
