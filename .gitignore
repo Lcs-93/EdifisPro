@@ -22,3 +22,62 @@
 /public/assets/
 /assets/vendor/
 ###< symfony/asset-mapper ###
+
+# Clés API, informations sensibles, et fichiers de configuration privés
+.env
+.env.*.local
+config/parameters.yml
+config/secrets/*/private.*
+config/secrets/*/public.*
+
+# Dossiers de cache et logs
+/var/
+/tmp/
+
+# Dossiers de dépendances gérés par Composer et npm
+/vendor/
+/node_modules/
+
+# Clés et certificats privés
+*.pem
+*.key
+*.crt
+
+# Fichiers de base de données et sauvegardes
+*.sql
+*.sqlite
+*.bak
+*.dump
+
+# Dossiers spécifiques à l'IDE (ex. IntelliJ, VSCode, PhpStorm)
+.idea/
+/.vscode/
+/*.iml
+
+# Fichiers générés automatiquement par l'IDE ou l'éditeur
+*~
+*.swp
+*.swo
+*.bak
+
+# Fichiers Git
+.git/
+
+# Fichiers de configuration temporaires ou liés aux environnements de développement
+/.docker/
+/.docker-compose.yml
+/.vagrant/
+.env.docker
+
+# Sauvegardes générées par certains éditeurs de texte
+*.bak
+*.tmp
+
+# Déploiement et configurations spécifiques à l'environnement
+/.docker
+/.vagrant
+/.kubernetes
+
+# Logs
+/logs/
+*.log
