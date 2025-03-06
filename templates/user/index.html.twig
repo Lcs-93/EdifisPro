@@ -3,27 +3,35 @@
 {% block title %}Dashboard Utilisateur{% endblock %}
 
 {% block body %}
-<h1>Bienvenue sur votre espace</h1>
+    <div class="container mt-5">
+        <nav class="navbar navbar-dark bg-dark mb-4 p-3 rounded">
+            <span class="navbar-brand mb-0 h1">Espace Employé</span>
+            <a href="{{ path('app_logout') }}" class="btn btn-outline-light">Déconnexion</a>
+        </nav>
 
-<p>Voici vos informations :</p>
-
-<ul>
-    <li>Nom : {{ app.user.nom }}</li>
-    <li>Prénom : {{ app.user.prenom }}</li>
-    <li>Compétences :
-        {% if app.user.competenceUsers() is not empty %}
-            {% for competence in app.user.competenceUsers() %}
-                <ul>
-                    {{ competence.getCompetence().nomCompetence }}
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h2 class="mb-0">Bienvenue, {{ app.user.prenom }} {{ app.user.nom }} !</h2>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">Voici vos informations :</p>
+                <ul class="list-group">
+                    <li class="list-group-item"><strong>Nom :</strong> {{ app.user.nom }}</li>
+                    <li class="list-group-item"><strong>Prénom :</strong> {{ app.user.prenom }}</li>
+                    <li class="list-group-item"><strong>Compétences :</strong>
+                        {% if app.user.competenceUsers() is not empty %}
+                            <ul class="mt-2">
+                                {% for competence in app.user.competenceUsers() %}
+                                    <li class="text-primary">{{ competence.getCompetence().nomCompetence }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <em class="text-muted">Aucune compétence attribuée.</em>
+                        {% endif %}
+                    </li>
                 </ul>
-            {% endfor %}
-        {% else %}
-        <em>Vous n'avez pas encore de compétence attribuée.</em>
-    {% endif %}
+            </div>
+        </div>
+    </div>
 
-
-    </li>
-</ul>
-
-<a href="{{ path('app_logout') }}">Déconnexion</a>
 {% endblock %}
