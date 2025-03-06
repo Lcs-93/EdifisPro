@@ -64,8 +64,8 @@
                                     {% endif %}
                                 </td>
                                 <td>
-                                    <a href="{{ path('app_chantier_show', {'id': chantier.id}) }}" class="btn btn-action btn-view" title="Voir">
-                                        <span class="material-icons-round">visibility</span>
+                                    <a href="{{ path('app_chantier_show', {'id': chantier.id}) }}" class="btn btn-circle btn-view" title="Voir">
+                                       <i class="material-icons-round"></i>
                                     </a>
                                     <a href="{{ path('app_chantier_edit', {'id': chantier.id}) }}" class="btn btn-action btn-edit" title="Modifier">
                                         <span class="material-icons-round">edit</span>
@@ -91,9 +91,9 @@
 
  
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Material+Icons+Round');
 
-    
+            @import url('https://fonts.googleapis.com/css2?family=Material+Icons+Round');
+
         .glassmorphism-card {
             background: rgba(255, 255, 255, 0.2);
             backdrop-filter: blur(10px);

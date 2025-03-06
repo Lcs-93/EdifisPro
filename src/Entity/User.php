@@ -228,7 +228,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
         return $this;
     }
-
+    public function getUsername(): string
+    {
+        return $this->email; // Remplace par la bonne propriété si nécessaire
+    }
+    
     public function removeEquipeUser(EquipeUser $equipeUser): static
     {
         if ($this->equipeUsers->removeElement($equipeUser)) {

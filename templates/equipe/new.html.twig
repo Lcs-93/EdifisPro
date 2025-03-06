@@ -4,149 +4,120 @@
     <div class="container mt-5 d-flex justify-content-center">
         <div class="card glassmorphism-card shadow-lg p-4">
             <h1 class="text-center text-primary mb-4">🚀 Créer une Équipe</h1>
+            <button class="btn btn-light mb-3" id="toggleDetails">Afficher/Masquer détails</button>
+            <div id="detailsSection">
+                {{ form_start(form) }}
 
-            {{ form_start(form) }}
-
-            <!-- Nom de l'équipe -->
-            <div class="mb-4">
-                {{ form_label(form.nomEquipe, 'Nom de l\'équipe', {'label_attr': {'class': 'form-label fw-bold'}}) }}
-                {{ form_widget(form.nomEquipe, {'attr': {'class': 'form-control custom-input'}}) }}
-            </div>
-
-            <!-- Sélection du Chef d'équipe -->
-            <div class="mb-4">
-                {{ form_label(form.chefEquipe, 'Chef d\'équipe', {'label_attr': {'class': 'form-label fw-bold'}}) }}
-                {{ form_widget(form.chefEquipe, {'attr': {'class': 'form-select custom-input'}}) }}
-            </div>
-
-<!-- Membres de l'équipe -->
-<h3 class="mt-4 text-secondary fw-bold">👥 Membres de l'équipe :</h3>
-<div class="card p-3 mb-3 glassmorphism-subcard">
-    <div class="row">
-        {% for membre in form.membres %}
-            <div class="col-md-4 mb-2">
-                <div class="form-check custom-checkbox">
-                    {{ form_widget(membre, {'attr': {'class': 'form-check-input'}}) }}
-                    {{ form_label(membre, null, {'label_attr': {'class': 'form-check-label'}}) }}
-                    {{ form_errors(membre) }} <!-- Afficher les erreurs de validation -->
+                <!-- Nom de l'équipe -->
+                <div class="mb-4">
+                    {{ form_label(form.nomEquipe, 'Nom de l\'équipe', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                    {{ form_widget(form.nomEquipe, {'attr': {'class': 'form-control custom-input'}}) }}
                 </div>
-            </div>
-        {% endfor %}
-    </div>
-</div>
 
-            <!-- Dates -->
-            <h3 class="mt-4 text-secondary fw-bold">📅 Dates d'affectation :</h3>
-            <div class="card p-3 mb-3 glassmorphism-subcard">
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        {{ form_label(form.dateDebut, 'Date de Début', {'label_attr': {'class': 'form-label fw-bold'}}) }}
-                        {{ form_widget(form.dateDebut, {'attr': {'class': 'form-control custom-input'}}) }}
-                        {{ form_errors(form.dateDebut) }}
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        {{ form_label(form.dateFin, 'Date de Fin', {'label_attr': {'class': 'form-label fw-bold'}}) }}
-                        {{ form_widget(form.dateFin, {'attr': {'class': 'form-control custom-input'}}) }}
-                        {{ form_errors(form.dateFin) }}
+                <!-- Sélection du Chef d'équipe (Avec Recherche) -->
+                <div class="mb-4">
+                    {{ form_label(form.chefEquipe, 'Chef d\'équipe', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                    {{ form_widget(form.chefEquipe, {'attr': {'class': 'form-select custom-input'}}) }}
+                </div>
+
+                <!-- Sélection rapide par service -->
+                <h3 class="mt-4 text-secondary fw-bold">👥 Ajouter des membres :</h3>
+                <select id="selectService" class="form-select">
+                    <option value="">Sélectionner un service...</option>
+                    <option value="technique">Service Technique</option>
+                    <option value="logistique">Service Logistique</option>
+                </select>
+                <button class="btn btn-secondary mt-2" id="addServiceMembers">Ajouter ces membres</button>
+
+                <!-- Membres de l'équipe avec Recherche -->
+                <input type="text" id="searchMembre" class="form-control mb-3" placeholder="Rechercher un membre...">
+                <div class="card p-3 mb-3 glassmorphism-subcard">
+                    <div class="row">
+                        {% for membre in form.membres %}
+                            <div class="col-md-4 mb-2">
+                                <div class="form-check custom-checkbox"
+                                     {% if membre.vars.attr.service is defined %} data-service="{{ membre.vars.attr.service }}" {% endif %}>
+                                    {{ form_widget(membre, {'attr': {'class': 'form-check-input'}}) }}
+                                    {{ form_label(membre, null, {'label_attr': {'class': 'form-check-label'}}) }}
+                                    {{ form_errors(membre) }}
+                                </div>
+                            </div>
+                        {% endfor %}
                     </div>
                 </div>
-            </div>
 
-            <div class="text-center">
-                <button type="submit" class="btn btn-glass btn-lg">
-                    <i class="fas fa-save"></i> Créer l'Équipe
-                </button>
-            </div>
+                <!-- Dates d'affectation -->
+                <h3 class="mt-4 text-secondary fw-bold">📅 Dates d'affectation :</h3>
+                <button class="btn btn-outline-primary mt-2" id="autoDates">Suggérer des dates</button>
+                <div class="card p-3 mb-3 glassmorphism-subcard">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form_label(form.dateDebut, 'Date de Début', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                            {{ form_widget(form.dateDebut, {'attr': {'class': 'form-control custom-input'}}) }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form_label(form.dateFin, 'Date de Fin', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                            {{ form_widget(form.dateFin, {'attr': {'class': 'form-control custom-input'}}) }}
+                        </div>
+                    </div>
+                </div>
 
-            {{ form_end(form) }}
+                <div class="text-center">
+                    <button type="submit" class="btn btn-glass btn-lg">
+                        <i class="fas fa-save"></i> Créer l'Équipe
+                    </button>
+                </div>
+
+                {{ form_end(form) }}
+            </div>
         </div>
     </div>
 
     <script>
     document.addEventListener("DOMContentLoaded", function() {
-        const form = document.querySelector("form");
-        const dateDebutInput = document.querySelector("#equipe_dateDebut");
-        const dateFinInput = document.querySelector("#equipe_dateFin");
+        $("#equipe_chefEquipe").select2({
+            placeholder: "Sélectionner un chef d'équipe",
+            allowClear: true
+        });
 
-        form.addEventListener("submit", function(event) {
-            let dateDebut = new Date(dateDebutInput.value);
-            let dateFin = new Date(dateFinInput.value);
+        document.getElementById("toggleDetails").addEventListener("click", function() {
+            let section = document.getElementById("detailsSection");
+            section.style.display = (section.style.display === "none") ? "block" : "none";
+        });
 
-            if (dateFin <= dateDebut) {
-                event.preventDefault();
-                alert("⚠️ La date de fin doit être postérieure à la date de début !");
-            }
+        document.getElementById("searchMembre").addEventListener("keyup", function() {
+            let searchValue = this.value.toLowerCase();
+            document.querySelectorAll(".custom-checkbox").forEach(check => {
+                let label = check.querySelector("label").textContent.toLowerCase();
+                check.style.display = label.includes(searchValue) ? "block" : "none";
+            });
+        });
+
+        document.getElementById("addServiceMembers").addEventListener("click", function() {
+            let service = document.getElementById("selectService").value;
+            document.querySelectorAll(".custom-checkbox").forEach(check => {
+                if (check.dataset.service === service) {
+                    check.querySelector("input").checked = true;
+                }
+            });
+        });
+
+        document.getElementById("autoDates").addEventListener("click", function() {
+            let today = new Date().toISOString().split("T")[0];
+            let endDate = new Date();
+            endDate.setFullYear(endDate.getFullYear() + 1);
+            document.getElementById("equipe_dateDebut").value = today;
+            document.getElementById("equipe_dateFin").value = endDate.toISOString().split("T")[0];
         });
     });
     </script>
 
-    <!-- 🟢 STYLES CSS -->
     <style>
-        /* 🌟 Glassmorphism Style */
-        .glassmorphism-card {
-            background: rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.2);
-            max-width: 800px;
-            width: 100%;
-        }
-
-        .glassmorphism-subcard {
-            background: rgba(255, 255, 255, 0.3);
-            backdrop-filter: blur(8px);
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        /* 🌟 Inputs */
-        .custom-input {
-            border-radius: 10px;
-            padding: 12px;
-            font-size: 16px;
-            background: rgba(255, 255, 255, 0.5);
-            transition: all 0.3s ease-in-out;
-        }
-
-        .custom-input:focus {
-            background: rgba(255, 255, 255, 0.8);
-            border: 1px solid #007bff;
-            box-shadow: 0px 0px 10px rgba(0, 123, 255, 0.3);
-        }
-
-        /* 🌟 Checkbox custom */
-        .custom-checkbox .form-check-input {
-            transform: scale(1.3);
-            margin-right: 8px;
-        }
-
-        /* 🌟 Bouton Glassmorphism */
-        .btn-glass {
-            background: linear-gradient(45deg, #007bff, #00d4ff);
-            border: none;
-            color: white;
-            padding: 12px 20px;
-            border-radius: 25px;
-            font-weight: bold;
-            transition: all 0.3s ease-in-out;
-            box-shadow: 0px 4px 15px rgba(0, 123, 255, 0.4);
-        }
-
-        .btn-glass:hover {
-            background: linear-gradient(45deg, #0056b3, #0096c7);
-            box-shadow: 0px 6px 20px rgba(0, 123, 255, 0.6);
-        }
-
-        /* 🌟 Animation Fade In */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .glassmorphism-card {
-            animation: fadeIn 0.8s ease-in-out;
+        @media (max-width: 768px) {
+            .glassmorphism-card {
+                width: 100%;
+                max-width: 90%;
+            }
         }
     </style>
 {% endblock %}

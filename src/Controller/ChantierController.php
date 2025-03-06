@@ -13,10 +13,45 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 #[Route('/chantier')]
 class ChantierController extends AbstractController
 {
+
+    #[Route('/api/chantiers', name: 'api_chantiers', methods: ['GET'])]
+    public function getChantiers(ChantierRepository $chantierRepository): JsonResponse
+    {
+        $chantiers = $chantierRepository->findAll();
+        
+        if (!$chantiers) {
+            return new JsonResponse(["message" => "Aucun chantier trouvé"], 404);
+        }
+
+        $chantierData = [];
+        foreach ($chantiers as $chantier) {
+            $equipes = [];
+            foreach ($chantier->getAffectations() as $affectation) {
+                if ($affectation->getEquipe()) {
+                    $equipes[] = $affectation->getEquipe()->getNomEquipe();
+                }
+            }
+
+            $chantierData[] = [
+                'id' => $chantier->getId(),
+                'lieu' => $chantier->getLieu(),
+                'status' => $chantier->getStatus(),
+                'dateDebut' => $chantier->getDateDebut()->format('Y-m-d'),
+                'dateFin' => $chantier->getDateFin()->format('Y-m-d'),
+                'equipes' => $equipes,
+            ];
+        }
+
+        return new JsonResponse($chantierData);
+    }
+
+
+
     #[Route('/new', name: 'app_chantier_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $em, EquipeRepository $equipeRepo): Response
     {
@@ -71,7 +106,8 @@ if (!array_intersect($competencesRequisesIds, $competencesEquipeIds)) {
             }
     
             if (!$validAffectation) {
-                return $this->render('chantier/new.html.twig', [
+                return $this->redirectToRoute('chantier_index' // ou 'chantier_list' selon ton routeur
+, [
                     'chantier' => $chantier,
                     'form' => $form->createView(),
                 ]);

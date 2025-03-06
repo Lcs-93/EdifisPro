@@ -27,7 +27,6 @@
                 <table class="table custom-table" id="teamTable">
                     <thead>
                         <tr>
-                            <th>ID</th>
                             <th>Nom de l'Équipe</th>
                             <th>Membres</th>
                             <th>Date Début</th>
@@ -38,22 +37,21 @@
                     <tbody>
                         {% for equipe in equipes %}
                             <tr class="table-row">
-                                <td><strong>{{ equipe.id }}</strong></td>
                                 <td class="team-name">{{ equipe.nomEquipe }}</td>
                                 <td>{{ equipe.equipeUsers|length }}</td>
                                 <td>{{ equipe.dateDebut|date("d/m/Y") }}</td>
                                 <td>{{ equipe.dateFin|date("d/m/Y") }}</td>
                                 <td class="actions">
-                                    <a href="{{ path('app_equipe_show', {'id': equipe.id}) }}" class="btn btn-circle btn-view">
-                                        <i class="fas fa-eye"></i>
+                                    <a href="{{ path('app_equipe_show', {'id': equipe.id}) }}" class="btn btn-circle btn-view" title="Voir">
+                                       <span class="material-icons-round">visibility</span>
                                     </a>
-                                    <a href="{{ path('app_equipe_edit', {'id': equipe.id}) }}" class="btn btn-circle btn-edit">
-                                        <i class="fas fa-edit"></i>
+                                    <a href="{{ path('app_equipe_edit', {'id': equipe.id}) }}" class="btn btn-circle btn-edit" title="Modifier">
+                                        <span class="material-icons-round">edit</span>
                                     </a>
                                     <form method="post" action="{{ path('app_equipe_delete', {'id': equipe.id}) }}" onsubmit="return confirm('Voulez-vous vraiment supprimer cette équipe ?');" class="d-inline">
                                         <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ equipe.id) }}">
-                                        <button class="btn btn-circle btn-delete">
-                                            <i class="fas fa-trash"></i>
+                                        <button class="btn btn-circle btn-delete" title="Supprimer">
+                                            <span class="material-icons-round">delete</span>
                                         </button>
                                     </form>
                                 </td>
@@ -120,6 +118,8 @@
 
     <!-- 🟢 STYLES CSS -->
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Material+Icons+Round');
+
         /* 🟢 Material UI Header */
         .custom-table th {
             background: black;

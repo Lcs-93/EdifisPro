@@ -6,93 +6,139 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Mon Application{% endblock %}</title>
 
-    <!-- Lien vers Bootstrap 5 et autres styles -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/frappe-gantt/0.5.0/frappe-gantt.min.css">
-
+    <!-- Styles -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    
+    <style>
+        body {
+            display: flex;
+            min-height: 100vh;
+            background-color: #f4f6f9;
+        }
 
-    {% block javascripts %}
-        {% block importmap %}{{ importmap('app') }}{% endblock %}
-    {% endblock %}
+        /* Sidebar */
+        .sidebar {
+            width: 220px;
+            height: 100vh;
+            background: #1e3c72;
+            color: white;
+            padding: 15px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .sidebar .nav {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar .nav li {
+            padding: 10px;
+        }
+
+        .sidebar .nav a {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            display: block;
+            padding: 8px;
+            border-radius: 5px;
+        }
+
+        .sidebar .nav a:hover,
+        .sidebar .nav a.active {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .sidebar .user-section {
+            text-align: center;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .sidebar .user-section p {
+            margin-bottom: 10px;
+        }
+
+        /* Contenu principal */
+        .content {
+            margin-left: 220px;
+            width: calc(100% - 220px);
+            padding: 20px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 60px;
+                padding: 10px;
+                align-items: center;
+            }
+
+            .sidebar .nav a {
+                font-size: 14px;
+                text-align: center;
+                padding: 5px;
+            }
+
+            .sidebar .nav a span {
+                display: none;
+            }
+
+            .sidebar .user-section {
+                display: none;
+            }
+
+            .content {
+                margin-left: 60px;
+                width: calc(100% - 60px);
+            }
+        }
+    </style>
 </head>
-<body class="bg-white"> <!-- Ajout de bg-white pour éviter un background bleu global -->
+<body>
 
-<!-- Afficher la navbar uniquement si l'utilisateur est connecté -->
 {% if app.user %}
-    <nav class="navbar navbar-expand-lg navbar-light bg-white">
-        <div class="container">
-            <!-- Vérifie si l'utilisateur est un admin pour rediriger vers la bonne page -->
-            <a class="navbar-brand" href="{% if is_granted('ROLE_ADMIN') %}{{ path('app_dashboard') }}{% else %}{{ path('user_dashboard') }}{% endif %}">
-                Mon Application
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <ul class="nav">
+            <li><a href="{{ path('app_dashboard') }}" class="{% if app.request.attributes.get('_route') == 'app_dashboard' %}active{% endif %}">Dashboard</a></li>
 
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    {% if is_granted('ROLE_ADMIN') %}
-                 
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ path('app_equipe_index') }}">Gestion équipes</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ path('app_chantier_index') }}">Gestion chantiers</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ path('app_competence_index') }}">Gestion compétences</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ path('app_user_list') }}">Gestion utilisateurs</a>
-                        </li>
-                    {% endif %}
-                           <li class="nav-item">
-                            <a class="nav-link" href="{{ path('app_dashboard') }}">Dashboard</a>
-                        </li>
-                </ul>
+            {% if is_granted('ROLE_ADMIN') %}
+                <li><a href="{{ path('app_equipe_index') }}" class="{% if app.request.attributes.get('_route') == 'app_equipe_index' %}active{% endif %}">Gestion équipes</a></li>
+                <li><a href="{{ path('app_chantier_index') }}" class="{% if app.request.attributes.get('_route') == 'app_chantier_index' %}active{% endif %}">Gestion chantiers</a></li>
+                <li><a href="{{ path('app_competence_index') }}" class="{% if app.request.attributes.get('_route') == 'app_competence_index' %}active{% endif %}">Gestion compétences</a></li>
+                <li><a href="{{ path('app_user_list') }}" class="{% if app.request.attributes.get('_route') == 'app_user_list' %}active{% endif %}">Gestion utilisateurs</a></li>
+            {% endif %}
+        </ul>
 
-                <!-- Menu "Compte" placé en dernier -->
-                <ul class="navbar-nav"> <!-- ms-auto pousse ce menu à la fin -->
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                            Compte
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li>
-                                <button type="button" class="dropdown-item btn btn-primary btn-sm rounded-0" data-bs-toggle="modal" data-bs-target="#editProfileModal">
-                                    Modifier mon profil
-                                </button>
-                            </li>
-                            <li><a class="dropdown-item btn btn-danger btn-sm rounded-0" href="{{ path('app_logout') }}">Déconnexion</a></li>
-                        </ul>
-                    </li>
-                </ul>
-            </div>
+        <!-- Profil utilisateur -->
+        <div class="user-section">
+            <p>{{ app.user.username }}</p>
+            <!-- Bouton Modifier mon profil -->
+            <button type="button" class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#editProfileModal">Modifier mon profil</button>
+            <br>
+            <a href="{{ path('app_logout') }}" class="btn btn-danger btn-sm mt-2">Déconnexion</a>
         </div>
-    </nav>
+    </div>
 {% endif %}
 
-{% for label, messages in app.flashes %}
-    {% for message in messages %}
-        <div class="alert alert-{{ label }}">
-            {{ message }}
-        </div>
-    {% endfor %}
-{% endfor %}
-
 <!-- Contenu principal -->
-<main class="container my-4">
+<div class="content">
     {% block body %}{% endblock %}
-</main>
+</div>
 
-<!-- Modal de modification du profil -->
+<!-- Modal Modifier mon profil -->
 <div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="editProfileModalLabel">Modifier mon profil</h5>
+                <h5 class="modal-title" id="editProfileModalLabel"></h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body" id="modalContent">
@@ -104,11 +150,10 @@
     </div>
 </div>
 
-<!-- Scripts nécessaires pour Bootstrap -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-<!-- Script AJAX pour charger le modal -->
+<!-- Script AJAX pour charger le contenu du profil -->
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         const modal = document.getElementById("editProfileModal");

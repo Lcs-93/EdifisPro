@@ -29,7 +29,6 @@
                 <table class="table custom-table" id="competenceTable">
                     <thead>
                         <tr>
-                            <th>ID</th>
                             <th><i class="fas fa-brain"></i> Nom de la compétence</th>
                             <th><i class="fas fa-tools"></i> Actions</th>
                         </tr>
@@ -37,11 +36,11 @@
                     <tbody>
                         {% for competence in competences %}
                             <tr class="competence-row">
-                                <td><strong>{{ competence.id }}</strong></td>
                                 <td class="competence-name">{{ competence.nomCompetence }}</td>
                                 <td>
                                     <a href="{{ path('app_competence_show', {'id': competence.id}) }}" class="btn btn-action btn-view" title="Voir">
                                         <i class="fas fa-eye"></i>
+                                       
                                     </a>
                                     <a href="{{ path('app_competence_edit', {'id': competence.id}) }}" class="btn btn-action btn-edit" title="Modifier">
                                         <i class="fas fa-pencil-alt"></i>
