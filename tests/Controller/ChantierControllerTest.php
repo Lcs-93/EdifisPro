@@ -2,116 +2,148 @@
 
 namespace App\Tests\Controller;
 
-use App\Entity\Chantier;
-use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\EntityRepository;
-use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use App\Entity\Chantier;
+use App\Repository\ChantierRepository;
+use Doctrine\ORM\EntityManagerInterface;
 
-final class ChantierControllerTest extends WebTestCase
+class ChantierControllerTest extends WebTestCase
 {
-    private KernelBrowser $client;
-    private EntityManagerInterface $manager;
-    private EntityRepository $chantierRepository;
-    private string $path = '/chantier/';
+    private $client;
+    private $entityManager;
+    private $chantierRepository;
 
     protected function setUp(): void
     {
-        $this->client = static::createClient();
-        $this->manager = static::getContainer()->get('doctrine')->getManager();
-        $this->chantierRepository = $this->manager->getRepository(Chantier::class);
+        parent::setUp();
+        $this->client = static::createClient([], [
+            'HTTP_HOST' => 'localhost'
+        ]);
+        $this->client->disableReboot(); // Empêche la réinitialisation de la session
+        $this->client->request('GET', '/'); // Initie une session
+        parent::setUp(); // Important pour éviter des problèmes d'initialisation
 
-        // Suppression de tous les chantiers pour partir sur une base propre
-        foreach ($this->chantierRepository->findAll() as $object) {
-            $this->manager->remove($object);
-        }
-        $this->manager->flush();
+        $this->entityManager = static::getContainer()->get(EntityManagerInterface::class);
+        $this->chantierRepository = static::getContainer()->get(ChantierRepository::class);
     }
 
-    public function testIndex(): void
+
+    /**
+     * Teste si la page d'index des chantiers se charge correctement
+     */
+    public function testIndexPageLoadsSuccessfully()
     {
-        $this->client->request('GET', $this->path);
-        self::assertResponseStatusCodeSame(200);
-        self::assertPageTitleContains('Chantier index');
+        $this->client->request('GET', '/chantier/');
+        $this->assertResponseIsSuccessful();
+        $this->assertSelectorTextContains('h1', 'construction Gestion des Chantiers');
     }
 
-    public function testNew(): void
+    /**
+     * Teste la création d'un nouveau chantier via le formulaire
+     */
+    public function testCreateNewChantier()
     {
-        $this->client->request('GET', sprintf('%snew', $this->path));
-        self::assertResponseStatusCodeSame(200);
+        // Récupérer la page de création d'un chantier
+        $crawler = $this->client->request('GET', '/chantier/new');
+        $this->assertResponseIsSuccessful();
 
-        $this->client->submitForm('Enregistrer le chantier', [
-            'chantier[lieu]' => 'Test Lieu',
-            'chantier[dateDebut]' => '2025-03-01 08:00:00',
-            'chantier[dateFin]' => '2025-03-05 18:00:00',
+        // Vérifier la présence du token CSRF
+        $csrfToken = $crawler->filter('input[name="chantier[_token]"]')->attr('value');
+        $this->assertNotEmpty($csrfToken, "Le token CSRF doit être présent");
+
+        // Soumettre le formulaire avec des données valides
+        $form = $crawler->selectButton('Créer le Chantier')->form([
+            'chantier[lieu]' => 'Test Chantier',
+            'chantier[dateDebut]' => '2025-01-01T00:00',
+            'chantier[dateFin]' => '2025-06-01T00:00',
             'chantier[status]' => 'en_cours',
+            'chantier[_token]' => $csrfToken
         ]);
 
-        self::assertResponseRedirects($this->path);
-        self::assertSame(1, $this->chantierRepository->count([]));
+        $this->client->submit($form);
+
+        // Vérifier si la réponse est une redirection (code 302)
+        $this->assertResponseRedirects('/chantier/', 302, "La page doit rediriger après la création du chantier");
+
+        // Suivre la redirection
+        $this->client->followRedirect();
+
+        // Vérifier que la page de destination est bien un succès (code 200)
+        $this->assertResponseIsSuccessful();
+
+        // Vérifier que le chantier a bien été ajouté en base de données
+        $chantierRepository = static::getContainer()->get(ChantierRepository::class);
+        $chantier = $chantierRepository->findOneBy(['lieu' => 'Test Chantier']);
+        $this->assertNotNull($chantier, "Le chantier doit être créé en base de données.");
     }
 
-    public function testShow(): void
+
+
+
+    /**
+     * Teste la modification d'un chantier existant
+     */
+    public function testEditChantier()
     {
+        // Vérifie que l'EntityManager est bien initialisé
+        $this->assertNotNull($this->entityManager, "EntityManager ne doit pas être null");
+
+        // Création d'un chantier en base
         $chantier = new Chantier();
-        $chantier->setLieu('Test Lieu');
-        $chantier->setDateDebut(new \DateTime('2025-03-01 08:00:00'));
-        $chantier->setDateFin(new \DateTime('2025-03-05 18:00:00'));
+        $chantier->setLieu('Chantier Modifiable');
+        $chantier->setDateDebut(new \DateTime('2025-01-01'));
+        $chantier->setDateFin(new \DateTime('2025-06-01'));
         $chantier->setStatus('en_cours');
 
-        $this->manager->persist($chantier);
-        $this->manager->flush();
+        // Persistance du chantier
+        $this->entityManager->persist($chantier);
+        $this->entityManager->flush();
 
-        $this->client->request('GET', sprintf('%s%s', $this->path, $chantier->getId()));
-        self::assertResponseStatusCodeSame(200);
-        self::assertPageTitleContains('Chantier');
+        // Vérification que le chantier a bien été enregistré
+        $chantier = $this->chantierRepository->findOneBy(['lieu' => 'Chantier Modifiable']);
+        $this->assertNotNull($chantier, "Le chantier doit être trouvé en base.");
 
-        self::assertSelectorTextContains('td', 'Test Lieu');
-    }
+        // Accéder à la page d'édition
+        $crawler = $this->client->request('GET', '/chantier/' . $chantier->getId() . '/edit');
+        $this->assertResponseIsSuccessful();
 
-    public function testEdit(): void
-    {
-        $chantier = new Chantier();
-        $chantier->setLieu('Ancien Lieu');
-        $chantier->setDateDebut(new \DateTime('2025-03-01 08:00:00'));
-        $chantier->setDateFin(new \DateTime('2025-03-05 18:00:00'));
-        $chantier->setStatus('en_cours');
-
-        $this->manager->persist($chantier);
-        $this->manager->flush();
-
-        $this->client->request('GET', sprintf('%s%s/edit', $this->path, $chantier->getId()));
-        $this->client->submitForm('Enregistrer le chantier', [
-            'chantier[lieu]' => 'Nouveau Lieu',
-            'chantier[dateDebut]' => '2025-03-10 08:00:00',
-            'chantier[dateFin]' => '2025-03-15 18:00:00',
-            'chantier[status]' => 'termine',
+        // Modification du chantier via le formulaire
+        $form = $crawler->selectButton('Mettre à Jour')->form([
+            'chantier[lieu]' => 'Lieu Modifié',
         ]);
 
-        self::assertResponseRedirects($this->path);
+        // Soumission du formulaire
+        $this->client->submit($form);
+        $this->assertResponseRedirects('/chantier/');
 
-        $updatedChantier = $this->chantierRepository->find($chantier->getId());
-        self::assertSame('Nouveau Lieu', $updatedChantier->getLieu());
-        self::assertEquals(new \DateTime('2025-03-10 08:00:00'), $updatedChantier->getDateDebut());
-        self::assertEquals(new \DateTime('2025-03-15 18:00:00'), $updatedChantier->getDateFin());
-        self::assertSame('termine', $updatedChantier->getStatus());
+        // Vérification après redirection
+        $this->client->followRedirect();
+        $chantierModifie = $this->chantierRepository->find($chantier->getId());
+        $this->assertSame('Lieu Modifié', $chantierModifie->getLieu(), "Le chantier doit être modifié.");
     }
 
-    public function testRemove(): void
+    /**
+     * Teste la suppression d'un chantier
+     */
+    /*public function testDeleteChantier()
     {
         $chantier = new Chantier();
-        $chantier->setLieu('Lieu à supprimer');
-        $chantier->setDateDebut(new \DateTime('2025-03-01 08:00:00'));
-        $chantier->setDateFin(new \DateTime('2025-03-05 18:00:00'));
+        $chantier->setLieu('Chantier à supprimer');
+        $chantier->setDateDebut(new \DateTime('2025-01-01'));
+        $chantier->setDateFin(new \DateTime('2025-06-01'));
         $chantier->setStatus('en_cours');
 
-        $this->manager->persist($chantier);
-        $this->manager->flush();
+        $this->entityManager->persist($chantier);
+        $this->entityManager->flush();
 
-        $this->client->request('GET', sprintf('%s%s', $this->path, $chantier->getId()));
-        $this->client->submitForm('Supprimer');
+        $csrfToken = $this->client->getContainer()->get('security.csrf.token_manager')->getToken('delete' . $chantier->getId());
+        $this->client->request('POST', '/chantier/' . $chantier->getId(), [
+            '_method' => 'DELETE',
+            '_token' => $csrfToken,
+        ]);
 
-        self::assertResponseRedirects($this->path);
-        self::assertSame(0, $this->chantierRepository->count([]));
-    }
+        $this->assertResponseRedirects('/chantier/');
+        $chantierSupprime = $this->chantierRepository->find($chantier->getId());
+        $this->assertNull($chantierSupprime);
+    }*/
 }

@@ -3,135 +3,130 @@
 namespace App\Tests\Controller;
 
 use App\Entity\User;
-use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\EntityRepository;
-use Symfony\Bundle\FrameworkBundle\KernelBrowser;
+use App\Repository\UserRepository;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 
-final class UserControllerTest extends WebTestCase
+class UserControllerTest extends WebTestCase
 {
-    private KernelBrowser $client;
-    private EntityManagerInterface $manager;
-    private EntityRepository $userRepository;
-    private string $path = '/user/';
+    private $client;
+    private $entityManager;
+    private $userRepository;
+    private $passwordHasher;
+    private $csrfTokenManager;
 
     protected function setUp(): void
     {
+        parent::setUp();
         $this->client = static::createClient();
-        $this->manager = static::getContainer()->get('doctrine')->getManager();
-        $this->userRepository = $this->manager->getRepository(User::class);
+        $this->entityManager = static::getContainer()->get(EntityManagerInterface::class);
+        $this->userRepository = static::getContainer()->get(UserRepository::class);
+        $this->passwordHasher = static::getContainer()->get(UserPasswordHasherInterface::class);
+        $this->csrfTokenManager = static::getContainer()->get(CsrfTokenManagerInterface::class);
 
-        foreach ($this->userRepository->findAll() as $object) {
-            $this->manager->remove($object);
-        }
-
-        $this->manager->flush();
+        // 🔹 Activation de la session pour éviter l'erreur CSRF
+        $session = static::getContainer()->get('session.factory')->createSession();
+        $session->set('test_session', true);
+        $session->save();
+        $this->client->getCookieJar()->set(new \Symfony\Component\BrowserKit\Cookie($session->getName(), $session->getId()));
     }
 
-    public function testIndex(): void
+    public function testUserDashboardRedirectionIfNotAuthenticated(): void
     {
-        $this->client->followRedirects();
-        $crawler = $this->client->request('GET', $this->path);
-
-        self::assertResponseStatusCodeSame(200);
-        self::assertPageTitleContains('User index');
-
-        // Use the $crawler to perform additional assertions e.g.
-        // self::assertSame('Some text on the page', $crawler->filter('.p')->first());
+        $this->client->request('GET', '/user');
+        $this->assertResponseRedirects('/login');
     }
 
-    public function testNew(): void
+    public function testUserDashboardAccessWithAuthentication(): void
     {
-        $this->markTestIncomplete();
-        $this->client->request('GET', sprintf('%snew', $this->path));
+        $user = $this->createUser('user1@example.com', 'password', 'Test', 'User', ['ROLE_USER']);
+        $this->client->loginUser($user);
+        $crawler = $this->client->request('GET', '/user');
 
-        self::assertResponseStatusCodeSame(200);
+        $this->assertResponseIsSuccessful();
+        $this->assertSelectorTextContains('h1', 'Bienvenue sur votre espace');
+    }
 
-        $this->client->submitForm('Save', [
-            'user[nom]' => 'Testing',
-            'user[prenom]' => 'Testing',
-            'user[email]' => 'Testing',
-            'user[password]' => 'Testing',
-            'user[role]' => 'Testing',
+    public function testUserListPage(): void
+    {
+        $user = $this->createUser('admin@example.com', 'password', 'Admin', 'User', ['ROLE_ADMIN']);
+        $this->client->loginUser($user);
+        $crawler = $this->client->request('GET', '/user/user_list');
+
+        $this->assertResponseIsSuccessful();
+        $this->assertSelectorExists('table');
+        $this->assertGreaterThan(0, $crawler->filter('table tbody tr')->count());
+    }
+
+    public function testCreateNewUser(): void
+    {
+        $user = $this->createUser('admin@example.com', 'password', 'Admin', 'User', ['ROLE_ADMIN']);
+        $this->client->loginUser($user);
+
+        $crawler = $this->client->request('GET', '/user/new');
+        $this->assertResponseIsSuccessful();
+
+
+        // 🔹 Sélection du bon bouton "Enregistrer"
+        $button = $crawler->selectButton('Enregistrer');
+        $this->assertNotNull($button, "Le bouton 'Enregistrer' n'existe pas !");
+        
+        $form = $button->form([
+            'user[nom]' => 'New User',
+            'user[prenom]' => 'Created',
+            'user[email]' => 'newuser@example.com',
+            'user[plainPassword]' => 'newpassword',
         ]);
 
-        self::assertResponseRedirects($this->path);
+        $this->client->submit($form);
+        $this->assertResponseRedirects('/user/user_list');
 
-        self::assertSame(1, $this->userRepository->count([]));
+        $newUser = $this->userRepository->findOneBy(['email' => 'newuser@example.com']);
+        $this->assertNotNull($newUser);
     }
 
-    public function testShow(): void
+   public function testEditUser(): void
     {
-        $this->markTestIncomplete();
-        $fixture = new User();
-        $fixture->setNom('My Title');
-        $fixture->setPrenom('My Title');
-        $fixture->setEmail('My Title');
-        $fixture->setPassword('My Title');
-        $fixture->setRole('My Title');
+        $admin = $this->createUser('admin@example.com', 'password', 'Admin', 'User', ['ROLE_ADMIN']);
+        $this->client->loginUser($admin);
 
-        $this->manager->persist($fixture);
-        $this->manager->flush();
+        $userToEdit = $this->createUser('edituser@example.com', 'password', 'Edit', 'User', ['ROLE_USER']);
+        $crawler = $this->client->request('GET', '/user/' . $userToEdit->getId() . '/edit');
 
-        $this->client->request('GET', sprintf('%s%s', $this->path, $fixture->getId()));
+        $this->assertResponseIsSuccessful();
 
-        self::assertResponseStatusCodeSame(200);
-        self::assertPageTitleContains('User');
 
-        // Use assertions to check that the properties are properly displayed.
-    }
-
-    public function testEdit(): void
-    {
-        $this->markTestIncomplete();
-        $fixture = new User();
-        $fixture->setNom('Value');
-        $fixture->setPrenom('Value');
-        $fixture->setEmail('Value');
-        $fixture->setPassword('Value');
-        $fixture->setRole('Value');
-
-        $this->manager->persist($fixture);
-        $this->manager->flush();
-
-        $this->client->request('GET', sprintf('%s%s/edit', $this->path, $fixture->getId()));
-
-        $this->client->submitForm('Update', [
-            'user[nom]' => 'Something New',
-            'user[prenom]' => 'Something New',
-            'user[email]' => 'Something New',
-            'user[password]' => 'Something New',
-            'user[role]' => 'Something New',
+        $button = $crawler->selectButton('Mettre à Jour');
+        $this->assertNotNull($button, "Le bouton 'Enregistrer' n'existe pas !");
+        
+        $form = $button->form([
+            'user[nom]' => 'Edited User',
+            'user[prenom]' => 'Updated',
+            'user[email]' => 'edited@example.com',
         ]);
 
-        self::assertResponseRedirects('/user/');
+        $this->client->submit($form);
+        $this->assertResponseRedirects('/user/user_list');
 
-        $fixture = $this->userRepository->findAll();
-
-        self::assertSame('Something New', $fixture[0]->getNom());
-        self::assertSame('Something New', $fixture[0]->getPrenom());
-        self::assertSame('Something New', $fixture[0]->getEmail());
-        self::assertSame('Something New', $fixture[0]->getPassword());
-        self::assertSame('Something New', $fixture[0]->getRole());
+        $updatedUser = $this->userRepository->findOneBy(['email' => 'edited@example.com']);
+        $this->assertNotNull($updatedUser);
     }
 
-    public function testRemove(): void
+    private function createUser(string $email, string $plainPassword, string $nom, string $prenom, array $roles = ['ROLE_USER']): User
     {
-        $this->markTestIncomplete();
-        $fixture = new User();
-        $fixture->setNom('Value');
-        $fixture->setPrenom('Value');
-        $fixture->setEmail('Value');
-        $fixture->setPassword('Value');
-        $fixture->setRole('Value');
+        $user = new User();
+        $user->setEmail($email);
+        $user->setNom($nom);
+        $user->setPrenom($prenom);
+        $user->setRoles($roles);
+        $hashedPassword = $this->passwordHasher->hashPassword($user, $plainPassword);
+        $user->setPassword($hashedPassword);
 
-        $this->manager->persist($fixture);
-        $this->manager->flush();
+        $this->entityManager->persist($user);
+        $this->entityManager->flush();
 
-        $this->client->request('GET', sprintf('%s%s', $this->path, $fixture->getId()));
-        $this->client->submitForm('Delete');
-
-        self::assertResponseRedirects('/user/');
-        self::assertSame(0, $this->userRepository->count([]));
+        return $user;
     }
 }

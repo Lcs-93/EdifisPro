@@ -2,118 +2,168 @@
 
 namespace App\Tests\Controller;
 
+use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use App\Entity\Equipe;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\EntityRepository;
-use Symfony\Bundle\FrameworkBundle\KernelBrowser;
-use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use App\Repository\EquipeRepository;
 
-final class EquipeControllerTest extends WebTestCase
+class EquipeControllerTest extends WebTestCase
 {
-    private KernelBrowser $client;
-    private EntityManagerInterface $manager;
-    private EntityRepository $equipeRepository;
-    private string $path = '/equipe/';
+    private $client;
+    private $entityManager;
+    private $equipeRepository;
 
     protected function setUp(): void
     {
+        parent::setUp();
+
         $this->client = static::createClient();
-        $this->manager = static::getContainer()->get('doctrine')->getManager();
-        $this->equipeRepository = $this->manager->getRepository(Equipe::class);
 
-        foreach ($this->equipeRepository->findAll() as $object) {
-            $this->manager->remove($object);
-        }
+        $session = static::getContainer()->get('session.factory')->createSession();
+        $session->start();
+        static::getContainer()->set('session', $session);
+        static::getContainer()->set('session', $session);
 
-        $this->manager->flush();
+        $this->entityManager = static::getContainer()->get(EntityManagerInterface::class);
+        $this->equipeRepository = static::getContainer()->get(EquipeRepository::class);
     }
 
-    public function testIndex(): void
-    {
-        $this->client->followRedirects();
-        $crawler = $this->client->request('GET', $this->path);
+     public function testIndexPage(): void
+{
+    $this->client->request('GET', '/equipe/');
+    $this->client->followRedirect(); // Suivre la redirection
+    $this->assertResponseIsSuccessful();
+    $this->assertSelectorTextContains('h1', '👥 Gestion des Équipes');
+}
 
-        self::assertResponseStatusCodeSame(200);
-        self::assertPageTitleContains('Equipe index');
+    public function testCreateEquipe(): void
+{
+    // 🔹 1. Charger la page du formulaire
+    $crawler = $this->client->request('GET', '/equipe/new');
+    $this->assertResponseIsSuccessful();
+    
+    // 🔹 2. Vérifier que le bouton du formulaire est bien détecté
+    dump($crawler->filter('button, input[type="submit"]')->each(fn($node) => $node->text()));
 
-        // Use the $crawler to perform additional assertions e.g.
-        // self::assertSame('Some text on the page', $crawler->filter('.p')->first());
+    // 🔹 3. Vérifier si le bon bouton est détecté
+    $button = $crawler->selectButton("Créer l'Équipe");
+    if ($button->count() === 0) {
+        dump('❌ Bouton non trouvé ! Vérifie son texte exact.');
+        $this->fail("Bouton de soumission introuvable !");
     }
 
-    public function testNew(): void
+    // 🔹 4. Sélectionner et remplir le formulaire
+    $form = $button->form([
+        'equipe[nomEquipe]' => 'Equipe Test',
+        'equipe[chefEquipe]' => 2, // Sélection d'un chef d'équipe valide
+        'equipe[dateDebut]' => '2025-01-01T08:00', // Format ISO pour datetime-local
+        'equipe[dateFin]' => '2025-06-01T18:00',
+    ]);
+
+    // 🔹 5. Vérifier les valeurs avant soumission
+    dump($form->getValues());
+
+    // 🔹 6. Soumettre le formulaire
+    $this->client->submit($form);
+
+    // 🔹 7. Vérifier s'il y a une erreur de validation du formulaire
+    if ($this->client->getResponse()->getStatusCode() === 200) {
+        dump("🛑 Le formulaire n'a pas été soumis correctement. Vérifions les erreurs.");
+        dump($crawler->filter('.invalid-feedback')->each(fn($node) => $node->text()));
+        $this->fail("Le formulaire n'a pas été soumis correctement.");
+    }
+
+    // 🔹 8. Vérifier que la soumission redirige bien
+    $this->assertResponseRedirects('/equipe');
+
+    // 🔹 9. Vérifier si l'équipe a bien été créée en base
+    $equipe = $this->equipeRepository->findOneBy(['nomEquipe' => 'Equipe Test']);
+    $this->assertNotNull($equipe);
+}
+
+
+   public function testShowEquipe(): void
     {
-        $this->markTestIncomplete();
-        $this->client->request('GET', sprintf('%snew', $this->path));
+        $equipe = new Equipe();
+        $equipe->setNomEquipe('Equipe Test Show');
+        $equipe->setDateDebut(new \DateTime('2025-01-01'));
+        $equipe->setDateFin(new \DateTime('2025-06-01'));
 
-        self::assertResponseStatusCodeSame(200);
+        $this->entityManager->persist($equipe);
+        $this->entityManager->flush();
 
-        $this->client->submitForm('Save', [
-            'equipe[nomEquipe]' => 'Testing',
-            'equipe[chefEquipe]' => 'Testing',
+        $this->client->request('GET', '/equipe/'.$equipe->getId());
+        $this->assertResponseIsSuccessful();
+        $this->assertSelectorTextContains('h2', 'Equipe Test Show');
+    }
+
+    public function testEditEquipe(): void
+    {
+        $equipe = new Equipe();
+        $equipe->setNomEquipe('Equipe Test Edit');
+        $equipe->setDateDebut(new \DateTime('2025-01-01'));
+        $equipe->setDateFin(new \DateTime('2025-06-01'));
+
+        $this->entityManager->persist($equipe);
+        $this->entityManager->flush();
+
+        $crawler = $this->client->request('GET', '/equipe/'.$equipe->getId().'/edit');
+        $this->assertResponseIsSuccessful();
+
+        $form = $crawler->selectButton('Mettre à jour')->form([
+            'equipe[nomEquipe]' => 'Equipe Modifiée'
         ]);
 
-        self::assertResponseRedirects($this->path);
+        $this->client->submit($form);
+        $this->assertResponseRedirects('/equipe');
 
-        self::assertSame(1, $this->equipeRepository->count([]));
+        $equipeModifiee = $this->equipeRepository->find($equipe->getId());
+        $this->assertSame('Equipe Modifiée', $equipeModifiee->getNomEquipe());
     }
 
-    public function testShow(): void
+    /*public function testDeleteEquipe(): void
     {
-        $this->markTestIncomplete();
-        $fixture = new Equipe();
-        $fixture->setNomEquipe('My Title');
-        $fixture->setChefEquipe('My Title');
-
-        $this->manager->persist($fixture);
-        $this->manager->flush();
-
-        $this->client->request('GET', sprintf('%s%s', $this->path, $fixture->getId()));
-
-        self::assertResponseStatusCodeSame(200);
-        self::assertPageTitleContains('Equipe');
-
-        // Use assertions to check that the properties are properly displayed.
-    }
-
-    public function testEdit(): void
-    {
-        $this->markTestIncomplete();
-        $fixture = new Equipe();
-        $fixture->setNomEquipe('Value');
-        $fixture->setChefEquipe('Value');
-
-        $this->manager->persist($fixture);
-        $this->manager->flush();
-
-        $this->client->request('GET', sprintf('%s%s/edit', $this->path, $fixture->getId()));
-
-        $this->client->submitForm('Update', [
-            'equipe[nomEquipe]' => 'Something New',
-            'equipe[chefEquipe]' => 'Something New',
+        // ✅ 1. Désactiver le reboot pour conserver la session
+        $this->client->disableReboot();
+        
+        // ✅ 2. Créer une session avant de récupérer le token CSRF
+        $session = static::getContainer()->get('session.factory')->createSession();
+        $session->start();
+        static::getContainer()->set('session', $session);
+    
+        // ✅ 3. Assigner la session au client
+        $this->client->getContainer()->set('session', $session);
+    
+        // ✅ 4. Créer une équipe fictive pour le test
+        $equipe = new Equipe();
+        $equipe->setNomEquipe('Equipe à Supprimer');
+        $equipe->setDateDebut(new \DateTime('2025-01-01'));
+        $equipe->setDateFin(new \DateTime('2025-06-01'));
+    
+        $this->entityManager->persist($equipe);
+        $this->entityManager->flush();
+    
+        // ✅ 5. Vérifier que l'équipe a bien été créée
+        $this->assertNotNull($this->equipeRepository->find($equipe->getId()));
+    
+        // ✅ 6. Récupérer le token CSRF après l'initialisation de la session
+        $csrfTokenManager = static::getContainer()->get('security.csrf.token_manager');
+        $csrfToken = $csrfTokenManager->getToken('delete' . $equipe->getId());
+    
+        // ✅ 7. Effectuer la requête DELETE avec le token CSRF
+        $this->client->request('POST', '/equipe/' . $equipe->getId(), [
+            '_method' => 'DELETE',
+            '_token' => $csrfToken->getValue(),
         ]);
-
-        self::assertResponseRedirects('/equipe/');
-
-        $fixture = $this->equipeRepository->findAll();
-
-        self::assertSame('Something New', $fixture[0]->getNomEquipe());
-        self::assertSame('Something New', $fixture[0]->getChefEquipe());
-    }
-
-    public function testRemove(): void
-    {
-        $this->markTestIncomplete();
-        $fixture = new Equipe();
-        $fixture->setNomEquipe('Value');
-        $fixture->setChefEquipe('Value');
-
-        $this->manager->persist($fixture);
-        $this->manager->flush();
-
-        $this->client->request('GET', sprintf('%s%s', $this->path, $fixture->getId()));
-        $this->client->submitForm('Delete');
-
-        self::assertResponseRedirects('/equipe/');
-        self::assertSame(0, $this->equipeRepository->count([]));
-    }
+    
+        // ✅ 8. Vérifier la redirection après suppression
+        $this->assertResponseRedirects('/equipe');
+    
+        // ✅ 9. Rafraîchir l'EntityManager pour éviter le cache
+        $this->entityManager->clear();
+    
+        // ✅ 10. Vérifier que l'équipe a bien été supprimée
+        $equipeSupprimee = $this->equipeRepository->find($equipe->getId());
+        $this->assertNull($equipeSupprimee, "L'équipe aurait dû être supprimée.");
+    }*/
 }

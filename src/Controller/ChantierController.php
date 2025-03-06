@@ -18,99 +18,115 @@ use Symfony\Component\Routing\Annotation\Route;
 class ChantierController extends AbstractController
 {
     #[Route('/new', name: 'app_chantier_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $em, EquipeRepository $equipeRepo): Response
-    {
-        $chantier = new Chantier();
-        $form = $this->createForm(ChantierType::class, $chantier);
-        $form->handleRequest($request);
+public function new(Request $request, EntityManagerInterface $em, EquipeRepository $equipeRepo): Response
+{
+    $chantier = new Chantier();
+    $form = $this->createForm(ChantierType::class, $chantier);
+    $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $dateDebutChantier = $chantier->getDateDebut();
-            $dateFinChantier = $chantier->getDateFin();
-            $equipes = $form->get('equipes')->getData();
-            $competencesRequises = $form->get('competences')->getData(); // ⚠ Récupération des compétences
+    if ($form->isSubmitted() && $form->isValid()) {
+        $dateDebutChantier = $chantier->getDateDebut();
+        $dateFinChantier = $chantier->getDateFin();
+        $equipes = $form->get('equipes')->getData();
+        $competencesRequises = $form->get('competences')->getData();
 
-            $validAffectation = true;
+        $validAffectation = true;
 
-            foreach ($equipes as $equipe) {
-                $dateDebutEquipe = $equipe->getDateDebut();
-                $dateFinEquipe = $equipe->getDateFin();
+        foreach ($equipes as $equipe) {
+            $dateDebutEquipe = $equipe->getDateDebut();
+            $dateFinEquipe = $equipe->getDateFin();
 
-                // Vérification des dates
-                if ($dateDebutEquipe > $dateFinChantier || $dateFinEquipe < $dateDebutChantier) {
+            // Vérification des dates de chevauchement avec d'autres chantiers
+            $existingAffectations = $em->getRepository(Affectation::class)->findBy(['equipe' => $equipe]);
+
+            foreach ($existingAffectations as $affectation) {
+                $existingChantier = $affectation->getChantier();
+                $existingDateDebut = $existingChantier->getDateDebut();
+                $existingDateFin = $existingChantier->getDateFin();
+
+                // Vérification si les dates se chevauchent
+                if (($dateDebutChantier >= $existingDateDebut && $dateDebutChantier <= $existingDateFin) || 
+                    ($dateFinChantier >= $existingDateDebut && $dateFinChantier <= $existingDateFin)) {
                     $validAffectation = false;
                     $this->addFlash(
                         'danger',
-                        "⚠ L'équipe '{$equipe->getNomEquipe()}' ne peut pas être affectée à ce chantier en raison des dates."
+                        "⚠ L'équipe '{$equipe->getNomEquipe()}' est déjà affectée à un autre chantier pendant cette période."
                     );
-                    continue;
-                }
-
-                // Vérification des compétences
-                $users = $equipe->getEquipeUsers()->map(fn($equipeUser) => $equipeUser->getUtilisateur());
-                $competencesEquipe = [];
-
-                foreach ($users as $user) {
-                    foreach ($user->getCompetenceUsers() as $competenceUser) {
-                        $competencesEquipe[] = $competenceUser->getCompetence();
-                    }
-                }
-
-                $competencesEquipeIds = array_map(fn($c) => $c->getId(), ($competencesEquipe instanceof \Doctrine\Common\Collections\Collection) ? $competencesEquipe->toArray() : $competencesEquipe);
-                $competencesRequisesIds = array_map(fn($c) => $c->getId(), ($competencesRequises instanceof \Doctrine\Common\Collections\Collection) ? $competencesRequises->toArray() : $competencesRequises);
-
-                // Vérifier si toutes les compétences requises sont présentes dans l'équipe
-                if (!array_intersect($competencesRequisesIds, $competencesEquipeIds)) {
-                    $validAffectation = false;
-                    $this->addFlash(
-                        'danger',
-                        "⚠ L'équipe '{$equipe->getNomEquipe()}' ne possède pas les compétences requises pour ce chantier."
-                    );
+                    break;
                 }
             }
 
             if (!$validAffectation) {
-                // Ajouter un message flash d'erreur
-                $this->addFlash(
-                    'danger',
-                    "⚠ L'une ou plusieurs des équipes sélectionnées ne possèdent pas les compétences requises pour ce chantier."
-                );
-                // Rediriger vers la page des chantiers
+                // Si une affectation n'est pas valide, on arrête l'assignation
                 return $this->redirectToRoute('app_chantier_index');
             }
 
-            // Enregistrement du chantier
-            $em->persist($chantier);
-            $em->flush();
+            // Vérification des compétences
+            $users = $equipe->getEquipeUsers()->map(fn($equipeUser) => $equipeUser->getUtilisateur());
+            $competencesEquipe = [];
 
-            // 🔥 Ajouter explicitement les compétences dans `competence_chantier`
-            foreach ($competencesRequises as $competence) {
-                $competenceChantier = new CompetenceChantier();
-                $competenceChantier->setChantier($chantier);
-                $competenceChantier->setCompetence($competence);
-                $em->persist($competenceChantier);
+            foreach ($users as $user) {
+                foreach ($user->getCompetenceUsers() as $competenceUser) {
+                    $competencesEquipe[] = $competenceUser->getCompetence();
+                }
             }
 
-            // 🔥 Enregistrer les affectations d'équipes
-            foreach ($equipes as $equipe) {
-                $affectation = new Affectation();
-                $affectation->setChantier($chantier);
-                $affectation->setEquipe($equipe);
-                $affectation->setDateDebut(max($dateDebutEquipe, $dateDebutChantier));
-                $affectation->setDateFin(min($dateFinEquipe, $dateFinChantier));
-                $em->persist($affectation);
+            $competencesEquipeIds = array_map(fn($c) => $c->getId(), ($competencesEquipe instanceof \Doctrine\Common\Collections\Collection) ? $competencesEquipe->toArray() : $competencesEquipe);
+            $competencesRequisesIds = array_map(fn($c) => $c->getId(), ($competencesRequises instanceof \Doctrine\Common\Collections\Collection) ? $competencesRequises->toArray() : $competencesRequises);
+
+            // Vérifier si toutes les compétences requises sont présentes dans l'équipe
+            if (!array_intersect($competencesRequisesIds, $competencesEquipeIds)) {
+                $validAffectation = false;
+                $this->addFlash(
+                    'danger',
+                    "⚠ L'équipe '{$equipe->getNomEquipe()}' ne possède pas les compétences requises pour ce chantier."
+                );
             }
+        }
 
-            $em->flush();
-
+        if (!$validAffectation) {
+            // Ajouter un message flash d'erreur
+            $this->addFlash(
+                'danger',
+                "⚠ L'une ou plusieurs des équipes sélectionnées ne possèdent pas les compétences requises pour ce chantier."
+            );
+            // Rediriger vers la page des chantiers
             return $this->redirectToRoute('app_chantier_index');
         }
 
-        return $this->render('chantier/new.html.twig', [
-            'chantier' => $chantier,
-            'form' => $form->createView(),
-        ]);
+        // Enregistrement du chantier
+        $em->persist($chantier);
+        $em->flush();
+
+        // Ajouter explicitement les compétences dans `competence_chantier`
+        foreach ($competencesRequises as $competence) {
+            $competenceChantier = new CompetenceChantier();
+            $competenceChantier->setChantier($chantier);
+            $competenceChantier->setCompetence($competence);
+            $em->persist($competenceChantier);
+        }
+
+        // Enregistrer les affectations d'équipes
+        foreach ($equipes as $equipe) {
+            $affectation = new Affectation();
+            $affectation->setChantier($chantier);
+            $affectation->setEquipe($equipe);
+            $affectation->setDateDebut(max($dateDebutEquipe, $dateDebutChantier));
+            $affectation->setDateFin(min($dateFinEquipe, $dateFinChantier));
+            $em->persist($affectation);
+        }
+
+        $em->flush();
+
+        return $this->redirectToRoute('app_chantier_index');
     }
+
+    return $this->render('chantier/new.html.twig', [
+        'chantier' => $chantier,
+        'form' => $form->createView(),
+    ]);
+}
+
 
     #[Route('/{id}', name: 'app_chantier_show', methods: ['GET'])]
     public function show(Chantier $chantier): Response
