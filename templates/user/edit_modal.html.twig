@@ -1,12 +1,7 @@
 <!-- Formulaire de modification du profil -->
 <div class="container p-4">
     <div class="text-center">
-        <!-- Avatar utilisateur -->
-        <img src="https://via.placeholder.com/100" alt="Avatar" class="rounded-circle img-thumbnail">
-        <div class="mt-2">
-            <button class="btn btn-outline-primary btn-sm"><i class="fas fa-image"></i> Changer</button>
-            <button class="btn btn-outline-danger btn-sm"><i class="fas fa-trash"></i> Supprimer</button>
-        </div>
+        <h5 class="modal-title" id="editProfileModalLabel">Modifier mon profil</h5>
     </div>
 
     <hr>
@@ -22,19 +17,17 @@
             </div>
         </div>
 
-        <hr>
+        <!-- Champ Email -->
+        <div class="row mb-3">
+            <div class="col-md-12">
+                {{ form_row(form.email, {'attr': {'class': 'form-control'}}) }}
+            </div>
+        </div>
 
         <!-- Champ Mot de Passe -->
         <div class="row mb-3">
             <div class="col-md-6">
                 {{ form_row(form.plainPassword, {'attr': {'class': 'form-control', 'type': 'password'}}) }}
-            </div>
-        </div>
-
-        <!-- Champ Email -->
-        <div class="row mb-3">
-            <div class="col-md-12">
-                {{ form_row(form.email, {'attr': {'class': 'form-control'}}) }}
             </div>
         </div>
 
