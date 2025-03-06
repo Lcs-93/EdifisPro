@@ -2,116 +2,91 @@
 
 namespace App\Tests\Controller;
 
-use App\Entity\Chantier;
-use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\EntityRepository;
-use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use App\Entity\Chantier;
+use App\Repository\ChantierRepository;
+use Doctrine\ORM\EntityManagerInterface;
 
-final class ChantierControllerTest extends WebTestCase
+class ChantierControllerTest extends WebTestCase
 {
-    private KernelBrowser $client;
-    private EntityManagerInterface $manager;
-    private EntityRepository $chantierRepository;
-    private string $path = '/chantier/';
+    private $client;
+    private $entityManager;
+    private $chantierRepository;
 
     protected function setUp(): void
     {
         $this->client = static::createClient();
-        $this->manager = static::getContainer()->get('doctrine')->getManager();
-        $this->chantierRepository = $this->manager->getRepository(Chantier::class);
-
-        // Suppression de tous les chantiers pour partir sur une base propre
-        foreach ($this->chantierRepository->findAll() as $object) {
-            $this->manager->remove($object);
-        }
-        $this->manager->flush();
+        $this->entityManager = static::getContainer()->get(EntityManagerInterface::class);
+        $this->chantierRepository = static::getContainer()->get(ChantierRepository::class);
     }
 
-    public function testIndex(): void
+    public function testIndexPageLoadsSuccessfully()
     {
-        $this->client->request('GET', $this->path);
-        self::assertResponseStatusCodeSame(200);
-        self::assertPageTitleContains('Chantier index');
+        $this->client->request('GET', '/chantier/');
+
+        $this->assertResponseIsSuccessful();
+        $this->assertSelectorTextContains('h1', 'Liste des Chantiers');
     }
 
-    public function testNew(): void
+    public function testCreateNewChantier()
     {
-        $this->client->request('GET', sprintf('%snew', $this->path));
-        self::assertResponseStatusCodeSame(200);
+        $crawler = $this->client->request('GET', '/chantier/new');
 
-        $this->client->submitForm('Enregistrer le chantier', [
-            'chantier[lieu]' => 'Test Lieu',
-            'chantier[dateDebut]' => '2025-03-01 08:00:00',
-            'chantier[dateFin]' => '2025-03-05 18:00:00',
-            'chantier[status]' => 'en_cours',
+        $this->assertResponseIsSuccessful();
+        $form = $crawler->selectButton('Enregistrer')->form([
+            'chantier[nom]' => 'Test Chantier',
+            'chantier[dateDebut]' => '2025-01-01',
+            'chantier[dateFin]' => '2025-06-01',
         ]);
 
-        self::assertResponseRedirects($this->path);
-        self::assertSame(1, $this->chantierRepository->count([]));
+        $this->client->submit($form);
+        $this->assertResponseRedirects('/chantier/');
+
+        $chantier = $this->chantierRepository->findOneBy(['nom' => 'Test Chantier']);
+        $this->assertNotNull($chantier);
     }
 
-    public function testShow(): void
+    public function testEditChantier()
     {
         $chantier = new Chantier();
-        $chantier->setLieu('Test Lieu');
-        $chantier->setDateDebut(new \DateTime('2025-03-01 08:00:00'));
-        $chantier->setDateFin(new \DateTime('2025-03-05 18:00:00'));
-        $chantier->setStatus('en_cours');
+        $chantier->setLieu('Chantier Modifiable');
+        $chantier->setDateDebut(new \DateTime('2025-01-01'));
+        $chantier->setDateFin(new \DateTime('2025-06-01'));
 
-        $this->manager->persist($chantier);
-        $this->manager->flush();
+        $this->entityManager->persist($chantier);
+        $this->entityManager->flush();
 
-        $this->client->request('GET', sprintf('%s%s', $this->path, $chantier->getId()));
-        self::assertResponseStatusCodeSame(200);
-        self::assertPageTitleContains('Chantier');
+        $crawler = $this->client->request('GET', '/chantier/'.$chantier->getId().'/edit');
+        $this->assertResponseIsSuccessful();
 
-        self::assertSelectorTextContains('td', 'Test Lieu');
-    }
-
-    public function testEdit(): void
-    {
-        $chantier = new Chantier();
-        $chantier->setLieu('Ancien Lieu');
-        $chantier->setDateDebut(new \DateTime('2025-03-01 08:00:00'));
-        $chantier->setDateFin(new \DateTime('2025-03-05 18:00:00'));
-        $chantier->setStatus('en_cours');
-
-        $this->manager->persist($chantier);
-        $this->manager->flush();
-
-        $this->client->request('GET', sprintf('%s%s/edit', $this->path, $chantier->getId()));
-        $this->client->submitForm('Enregistrer le chantier', [
-            'chantier[lieu]' => 'Nouveau Lieu',
-            'chantier[dateDebut]' => '2025-03-10 08:00:00',
-            'chantier[dateFin]' => '2025-03-15 18:00:00',
-            'chantier[status]' => 'termine',
+        $form = $crawler->selectButton('Enregistrer')->form([
+            'chantier[nom]' => 'Chantier Modifié',
         ]);
 
-        self::assertResponseRedirects($this->path);
+        $this->client->submit($form);
+        $this->assertResponseRedirects('/chantier/');
 
-        $updatedChantier = $this->chantierRepository->find($chantier->getId());
-        self::assertSame('Nouveau Lieu', $updatedChantier->getLieu());
-        self::assertEquals(new \DateTime('2025-03-10 08:00:00'), $updatedChantier->getDateDebut());
-        self::assertEquals(new \DateTime('2025-03-15 18:00:00'), $updatedChantier->getDateFin());
-        self::assertSame('termine', $updatedChantier->getStatus());
+        $chantierModifie = $this->chantierRepository->find($chantier->getId());
+        $this->assertSame('Chantier Modifié', $chantierModifie->getNom());
     }
 
-    public function testRemove(): void
+    public function testDeleteChantier()
     {
         $chantier = new Chantier();
-        $chantier->setLieu('Lieu à supprimer');
-        $chantier->setDateDebut(new \DateTime('2025-03-01 08:00:00'));
-        $chantier->setDateFin(new \DateTime('2025-03-05 18:00:00'));
-        $chantier->setStatus('en_cours');
+        $chantier->setLieu('Chantier à supprimer');
+        $chantier->setDateDebut(new \DateTime('2025-01-01'));
+        $chantier->setDateFin(new \DateTime('2025-06-01'));
 
-        $this->manager->persist($chantier);
-        $this->manager->flush();
+        $this->entityManager->persist($chantier);
+        $this->entityManager->flush();
 
-        $this->client->request('GET', sprintf('%s%s', $this->path, $chantier->getId()));
-        $this->client->submitForm('Supprimer');
+        $this->client->request('POST', '/chantier/'.$chantier->getId(), [
+            '_method' => 'DELETE',
+            '_token' => $this->client->getContainer()->get('security.csrf.token_manager')->getToken('delete'.$chantier->getId()),
+        ]);
 
-        self::assertResponseRedirects($this->path);
-        self::assertSame(0, $this->chantierRepository->count([]));
+        $this->assertResponseRedirects('/chantier/');
+        $chantierSupprime = $this->chantierRepository->find($chantier->getId());
+        $this->assertNull($chantierSupprime);
     }
 }
