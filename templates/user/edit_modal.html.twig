@@ -1,7 +1,9 @@
 <!-- Formulaire de modification du profil -->
 <div class="container p-4">
-    <h4 class="text-center">Modifier mon profil</h4>
-    
+    <div class="text-center">
+        <h5 class="modal-title" id="editProfileModalLabel">Modifier mon profil</h5>
+    </div>
+
     <hr>
 
     <form id="editProfileForm" method="post" action="{{ path('user_edit_modal') }}">
@@ -15,28 +17,25 @@
             </div>
         </div>
 
-        <hr>
-
         <!-- Champ Email -->
-        <div class="mb-3">
-            {{ form_row(form.email, {'attr': {'class': 'form-control'}}) }}
+        <div class="row mb-3">
+            <div class="col-md-12">
+                {{ form_row(form.email, {'attr': {'class': 'form-control'}}) }}
+            </div>
         </div>
 
         <!-- Champ Mot de Passe -->
-        <div class="mb-3">
-            {{ form_row(form.plainPassword, {'attr': {'class': 'form-control', 'type': 'password'}}) }}
+        <div class="row mb-3">
+            <div class="col-md-6">
+                {{ form_row(form.plainPassword, {'attr': {'class': 'form-control', 'type': 'password'}}) }}
+            </div>
         </div>
 
-        <hr>
-
-        <!-- Bouton d'enregistrement -->
-        <div class="text-center">
-            <button type="submit" class="btn btn-primary">Enregistrer</button>
-        </div>
+        {{ form_end(form) }}
     </form>
 
     <!-- Message de confirmation -->
     <div id="profileUpdateSuccess" class="alert alert-success text-center mt-3 d-none" role="alert">
-        Profil mis à jour avec succès !
+        <i class="fas fa-check-circle"></i> Profil mis à jour avec succès !
     </div>
 </div>
